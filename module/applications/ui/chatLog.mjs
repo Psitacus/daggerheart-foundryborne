@@ -1,3 +1,5 @@
+import { getCommandTarget } from '../../helpers/utils.mjs';
+
 export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLog {
     constructor() {
         super();
@@ -57,9 +59,6 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
         );
         html.querySelectorAll('.action-use-button').forEach(element =>
             element.addEventListener('click', event => this.actionUseButton.call(this, event, data.message))
-        );
-        html.querySelectorAll('.refund-resources-button').forEach(element =>
-            element.addEventListener('click', event => this.onRefundResources.call(this, event, data.message))
         );
     };
 
@@ -282,9 +281,102 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
     abilityUseButton = async (event, message) => {
         event.stopPropagation();
 
-        const action = message.system.actions[Number.parseInt(event.currentTarget.dataset.index)];
-        const actor = game.actors.get(message.system.source.actor);
-        await actor.useAction(action);
+        // Get the action data from the chat message
+        const actionData = message.system.actions[Number.parseInt(event.currentTarget.dataset.index)];
+        // Get the currently selected actor (from selected token)
+        const actor = getCommandTarget();
+        if (!actor) {
+            ui.notifications.warn(game.i18n.localize('DAGGERHEART.UI.Notifications.noSelectedToken'));
+            return;
+        }
+
+        // Try to find the original action from the source item first
+        const sourceActor = message.system.source?.actor ? await foundry.utils.fromUuid(message.system.source.actor) : null;
+        const sourceItem = message.system.source?.item ? sourceActor?.items?.get(message.system.source.item) : null;
+        
+        if (sourceItem && sourceActor) {
+            // Find the specific action on the source item
+            const sourceAction = sourceItem.system.actions?.find(a => a._id === actionData._id);
+            if (sourceAction) {
+                try {
+                    // Temporarily override the action's actor reference to use the selected actor
+                    const originalActor = sourceAction.actor;
+                    const originalItem = sourceAction.item;
+                    
+                    // Create temporary getters that return our selected actor
+                    Object.defineProperty(sourceAction, 'actor', {
+                        get: () => actor,
+                        configurable: true
+                    });
+                    
+                    Object.defineProperty(sourceAction, 'item', {
+                        get: () => ({
+                            ...originalItem,
+                            actor: actor,
+                            parent: actor
+                        }),
+                        configurable: true
+                    });
+                    
+                    // Use the action
+                    await sourceAction.use(event);
+                    
+                    // Restore the original references
+                    Object.defineProperty(sourceAction, 'actor', {
+                        get: () => originalActor,
+                        configurable: true
+                    });
+                    
+                    Object.defineProperty(sourceAction, 'item', {
+                        get: () => originalItem,
+                        configurable: true
+                    });
+                    
+                    return;
+                } catch (e) {
+                    console.error('Error using source action from chat:', e);
+                    // Restore original references if there was an error
+                    delete sourceAction.actor;
+                    delete sourceAction.item;
+                }
+            }
+        }
+
+        // Fallback: Create action using an existing item from the selected actor
+        try {
+            // Find any weapon or item on the selected actor to use as a template
+            const actorItems = actor.items.filter(item => item.system.actions?.length > 0);
+            let templateItem = actorItems.find(item => item.system.actions.some(a => a.type === actionData.type));
+            
+            if (!templateItem && actorItems.length > 0) {
+                templateItem = actorItems[0]; // Use any item with actions as a fallback
+            }
+            
+            if (templateItem) {
+                // Use the template item's action structure but with our action data
+                const { actionsTypes } = await import('../../data/action/_module.mjs');
+                const ActionClass = actionsTypes[actionData.type];
+                
+                if (ActionClass) {
+                    // Create the action with the template item's system as parent
+                    const actionInstance = new ActionClass({
+                        ...actionData,
+                        _id: foundry.utils.randomID(),
+                        name: actionData.name || game.i18n.localize(`DAGGERHEART.ACTIONS.TYPES.${actionData.type}.name`)
+                    }, { parent: templateItem.system });
+                    
+                    await actionInstance.use(event);
+                    return;
+                }
+            }
+            
+            // Final fallback - just show a notification
+            ui.notifications.info(`Using ${actionData.name || actionData.type} action with selected token: ${actor.name}`);
+            
+        } catch (e) {
+            console.error('Error using action from chat:', e);
+            ui.notifications.error(`Error using action: ${e.message}`);
+        }
     };
 
     actionUseButton = async (_, message) => {
@@ -297,77 +389,5 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
         );
 
         action.use();
-    };
-
-    /**
-     * Handle refunding resources spent during an action
-     * @param {MouseEvent} event
-     * @param {object} message
-     */
-    onRefundResources = async (event, message) => {
-        event.stopPropagation();
-        
-        // Get the actor who performed the action
-        const actor = await this.getActor(message.system.source.actor);
-        if (!actor) {
-            ui.notifications.warn(game.i18n.localize('DAGGERHEART.Notification.Warn.ActorNotFound'));
-            return;
-        }
-
-        // Check if user has permission to refund resources
-        if (!actor.isOwner && !game.user.isGM) {
-            ui.notifications.warn(game.i18n.localize('DAGGERHEART.Notification.Warn.NoPermissionToRefund'));
-            return;
-        }
-
-        // Check if resources were already refunded
-        if (message.system.resourcesRefunded) {
-            ui.notifications.info(game.i18n.localize('DAGGERHEART.Notification.Info.ResourcesAlreadyRefunded'));
-            return;
-        }
-
-        // Get the resources that were spent (stored in the message)
-        const spentResources = message.system.spentResources;
-        if (!spentResources || spentResources.length === 0) {
-            ui.notifications.info(game.i18n.localize('DAGGERHEART.Notification.Info.NoResourcesToRefund'));
-            return;
-        }
-
-        // Confirm refund with user
-        const confirm = await foundry.applications.api.DialogV2.confirm({
-            window: { title: game.i18n.localize('DAGGERHEART.Chat.RefundResources.ConfirmTitle') },
-            content: `<p>${game.i18n.localize('DAGGERHEART.Chat.RefundResources.ConfirmText')}</p>
-                     <ul>${spentResources.map(r => `<li>${game.i18n.localize('DAGGERHEART.Resources.' + r.type)}: ${r.value}</li>`).join('')}</ul>`
-        });
-
-        if (!confirm) return;
-
-        try {
-            // Refund the resources by inverting the values
-            const refundResources = spentResources.map(resource => ({
-                ...resource,
-                value: -resource.value
-            }));
-
-            await actor.modifyResource(refundResources);
-
-            // Mark the message as refunded to prevent double refunding
-            const chatMessage = game.messages.get(message._id);
-            await chatMessage?.update({
-                system: { resourcesRefunded: true }
-            });
-
-            // Show success notification
-            ui.notifications.info(game.i18n.localize('DAGGERHEART.Notification.Info.ResourcesRefunded'));
-
-            // Disable the refund button visually
-            const button = event.currentTarget;
-            button.disabled = true;
-            button.textContent = game.i18n.localize('DAGGERHEART.Chat.RefundResources.Refunded');
-
-        } catch (error) {
-            console.error('Error refunding resources:', error);
-            ui.notifications.error(game.i18n.localize('DAGGERHEART.Notification.Error.RefundFailed'));
-        }
-    };
+    }
 }
