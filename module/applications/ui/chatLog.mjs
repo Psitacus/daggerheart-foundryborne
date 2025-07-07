@@ -58,6 +58,9 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
         html.querySelectorAll('.action-use-button').forEach(element =>
             element.addEventListener('click', event => this.actionUseButton.call(this, event, data.message))
         );
+        html.querySelectorAll('.refund-resources-button').forEach(element =>
+            element.addEventListener('click', event => this.onRefundResources.call(this, event, data.message))
+        );
     };
 
     setupHooks() {
@@ -294,5 +297,77 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
         );
 
         action.use();
+    };
+
+    /**
+     * Handle refunding resources spent during an action
+     * @param {MouseEvent} event
+     * @param {object} message
+     */
+    onRefundResources = async (event, message) => {
+        event.stopPropagation();
+        
+        // Get the actor who performed the action
+        const actor = await this.getActor(message.system.source.actor);
+        if (!actor) {
+            ui.notifications.warn(game.i18n.localize('DAGGERHEART.Notification.Warn.ActorNotFound'));
+            return;
+        }
+
+        // Check if user has permission to refund resources
+        if (!actor.isOwner && !game.user.isGM) {
+            ui.notifications.warn(game.i18n.localize('DAGGERHEART.Notification.Warn.NoPermissionToRefund'));
+            return;
+        }
+
+        // Check if resources were already refunded
+        if (message.system.resourcesRefunded) {
+            ui.notifications.info(game.i18n.localize('DAGGERHEART.Notification.Info.ResourcesAlreadyRefunded'));
+            return;
+        }
+
+        // Get the resources that were spent (stored in the message)
+        const spentResources = message.system.spentResources;
+        if (!spentResources || spentResources.length === 0) {
+            ui.notifications.info(game.i18n.localize('DAGGERHEART.Notification.Info.NoResourcesToRefund'));
+            return;
+        }
+
+        // Confirm refund with user
+        const confirm = await foundry.applications.api.DialogV2.confirm({
+            window: { title: game.i18n.localize('DAGGERHEART.Chat.RefundResources.ConfirmTitle') },
+            content: `<p>${game.i18n.localize('DAGGERHEART.Chat.RefundResources.ConfirmText')}</p>
+                     <ul>${spentResources.map(r => `<li>${game.i18n.localize('DAGGERHEART.Resources.' + r.type)}: ${r.value}</li>`).join('')}</ul>`
+        });
+
+        if (!confirm) return;
+
+        try {
+            // Refund the resources by inverting the values
+            const refundResources = spentResources.map(resource => ({
+                ...resource,
+                value: -resource.value
+            }));
+
+            await actor.modifyResource(refundResources);
+
+            // Mark the message as refunded to prevent double refunding
+            const chatMessage = game.messages.get(message._id);
+            await chatMessage?.update({
+                system: { resourcesRefunded: true }
+            });
+
+            // Show success notification
+            ui.notifications.info(game.i18n.localize('DAGGERHEART.Notification.Info.ResourcesRefunded'));
+
+            // Disable the refund button visually
+            const button = event.currentTarget;
+            button.disabled = true;
+            button.textContent = game.i18n.localize('DAGGERHEART.Chat.RefundResources.Refunded');
+
+        } catch (error) {
+            console.error('Error refunding resources:', error);
+            ui.notifications.error(game.i18n.localize('DAGGERHEART.Notification.Error.RefundFailed'));
+        }
     };
 }

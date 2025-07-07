@@ -1261,7 +1261,11 @@
                 "fear": {
                     "name": "Fear",
                     "hint": "The Fear pool of the GM."
-                }
+                },
+                "hope": "Hope",
+                "hitPoints": "Hit Points",
+                "stress": "Stress",
+                "armorStack": "Armor Marks"
             },
             "VariantRules": {
                 "FIELDS": {
@@ -1313,7 +1317,13 @@
                     "communityTitle": "Community Card",
                     "subclassFeatureTitle": "Subclass Feature"
                 },
-                "featureTitle": "Class Feature"
+                "featureTitle": "Class Feature",
+                "refundResources": {
+                    "button": "Refund Resources",
+                    "refunded": "Resources Refunded",
+                    "confirmTitle": "Refund Resources",
+                    "confirmText": "Are you sure you want to refund the following resources?"
+                }
             },
             "Notifications": {
                 "adversaryMissing": "The linked adversary doesn't exist in the world.",
@@ -1353,7 +1363,13 @@
                 "damageAlreadyNone": "The damage has already been reduced to none",
                 "noAvailableArmorMarks": "You have no more available armor marks",
                 "notEnoughStress": "You don't have enough stress",
-                "damageIgnore": "{character} did not take damage"
+                "damageIgnore": "{character} did not take damage",
+                "actorNotFound": "Actor not found",
+                "noPermissionToRefund": "You don't have permission to refund resources for this actor",
+                "resourcesAlreadyRefunded": "Resources have already been refunded for this action",
+                "noResourcesToRefund": "No resources were spent that can be refunded",
+                "resourcesRefunded": "Resources have been successfully refunded",
+                "refundFailed": "Failed to refund resources"
             },
             "Tooltip": {
                 "openItemWorld": "Open Item World",

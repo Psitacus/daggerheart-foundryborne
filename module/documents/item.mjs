@@ -124,7 +124,11 @@ export default class DHItem extends foundry.documents.Item {
             img: this.img,
             name: this.name,
             description: this.system.description,
-            actions: []
+            actions: this.system.actions ?? [],
+            source: {
+                actor: this.actor?.uuid ?? this.actor?.id ?? null,
+                item: this.id
+            }
         };
         const msg = new cls({
             type: 'abilityUse',
