@@ -824,7 +824,7 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             description: item.system.description,
             actions: item.system.actions,
             source: {
-                actor: item.actor?.uuid ?? item.actor?.id ?? null,
+                actor: this.item?.actor?.uuid ?? null,
                 item: item.uuid ?? item.id
             }
         };
@@ -917,7 +917,7 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             img: item.img,
             description: item.system.description,
             source: {
-                actor: item.actor?.uuid ?? item.actor?.id ?? null,
+                actor: this.item?.actor?.uuid ?? null,
                 item: item.uuid ?? item.id
             }
         };
