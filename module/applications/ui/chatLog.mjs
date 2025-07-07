@@ -288,7 +288,7 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
         const actor = getCommandTarget();
         
         if (!actor) {
-            ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.noTokenSelected'));
+            ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.noSelectedToken'));
             return;
         }
 

@@ -111,7 +111,7 @@ export const getCommandTarget = () => {
         }
     }
     if (!target) {
-        ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.noTokenSelected'));
+        ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.noSelectedToken'));
         return null;
     }
     if (target.type !== 'character') {
