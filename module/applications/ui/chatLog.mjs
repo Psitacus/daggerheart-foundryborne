@@ -340,5 +340,5 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
         );
 
         action.use();
-    }
+    };
 }

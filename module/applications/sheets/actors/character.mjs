@@ -702,7 +702,7 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             description: card.system.effect,
             actions: card.system.actions,
             source: {
-                actor: card.actor?.uuid ?? card.actor?.id ?? null,
+                actor: card.actor?.uuid ?? null,
                 item: card.uuid ?? card.id
             }
         };

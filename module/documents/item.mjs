@@ -131,7 +131,7 @@ export default class DHItem extends foundry.documents.Item {
             description: this.system.description,
             actions: this.system.actions ?? [],
             source: {
-                actor: this.actor?.uuid ?? this.actor?.id ?? null,
+                actor: this.actor?.uuid ?? null,
                 item: this.uuid ?? this.id
             }
         };
