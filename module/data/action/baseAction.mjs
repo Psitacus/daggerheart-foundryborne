@@ -536,8 +536,8 @@ export default class DHBaseAction extends foundry.abstract.DataModel {
             description: this.description,
             actions: [],
             source: {
-                actor: this.item?.actor?.uuid ?? this.item?.actor?.id ?? null,
-                item: this.item?.uuid ?? this.item?.id ?? null
+                actor: this.item?.actor?.uuid ?? null,
+                item: this.item?.uuid ?? null
             }
         };
         const msg = new cls({
