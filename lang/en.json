@@ -1332,6 +1332,8 @@
                 "noAssignedPlayerCharacter": "You have no assigned character.",
                 "noSelectedToken": "You have no selected token",
                 "noSourceItem": "No source item found in chat message",
+                "noSourceActor": "No source actor found in chat message",
+                "sourceActorNotFound": "Source actor not found",
                 "sourceItemNotFound": "Source item not found",
                 "actionNotFound": "Action '{id}' not found on source item",
                 "actionUseFailed": "Failed to use action '{action}': {error}",
