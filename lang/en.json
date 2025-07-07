@@ -1261,11 +1261,7 @@
                 "fear": {
                     "name": "Fear",
                     "hint": "The Fear pool of the GM."
-                },
-                "hope": "Hope",
-                "hitPoints": "Hit Points",
-                "stress": "Stress",
-                "armorStack": "Armor Marks"
+                }
             },
             "VariantRules": {
                 "FIELDS": {
@@ -1317,13 +1313,7 @@
                     "communityTitle": "Community Card",
                     "subclassFeatureTitle": "Subclass Feature"
                 },
-                "featureTitle": "Class Feature",
-                "refundResources": {
-                    "button": "Refund Resources",
-                    "refunded": "Resources Refunded",
-                    "confirmTitle": "Refund Resources",
-                    "confirmText": "Are you sure you want to refund the following resources?"
-                }
+                "featureTitle": "Class Feature"
             },
             "Notifications": {
                 "adversaryMissing": "The linked adversary doesn't exist in the world.",
@@ -1333,7 +1323,14 @@
                 "attackTargetDoesNotExist": "The target token no longer exists",
                 "insufficentAdvancements": "You don't have enough advancements left.",
                 "noAssignedPlayerCharacter": "You have no assigned character.",
-                "noSelectedToken": "You have no selected token",
+                "noTokenSelected": "No token is selected",
+                "noSourceItem": "No source item found in chat message",
+                "sourceItemNotFound": "Source item not found",
+                "failedToCreateTemporaryItem": "Failed to create temporary item for action use",
+                "actionNotFound": "Action '{id}' not found on source item",
+                "actionTypeNotFound": "Action type '{type}' not found",
+                "actionUseFailed": "Failed to use action '{action}': {error}",
+                "actionNotAvailable": "This action is not available",
                 "onlyUseableByPC": "This can only be used with a PC token",
                 "dualityParsing": "Duality roll not properly formated",
                 "attributeFaulty": "The supplied Attribute doesn't exist",
@@ -1363,13 +1360,7 @@
                 "damageAlreadyNone": "The damage has already been reduced to none",
                 "noAvailableArmorMarks": "You have no more available armor marks",
                 "notEnoughStress": "You don't have enough stress",
-                "damageIgnore": "{character} did not take damage",
-                "actorNotFound": "Actor not found",
-                "noPermissionToRefund": "You don't have permission to refund resources for this actor",
-                "resourcesAlreadyRefunded": "Resources have already been refunded for this action",
-                "noResourcesToRefund": "No resources were spent that can be refunded",
-                "resourcesRefunded": "Resources have been successfully refunded",
-                "refundFailed": "Failed to refund resources"
+                "damageIgnore": "{character} did not take damage"
             },
             "Tooltip": {
                 "openItemWorld": "Open Item World",

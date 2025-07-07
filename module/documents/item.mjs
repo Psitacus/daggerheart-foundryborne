@@ -111,6 +111,7 @@ export default class DHItem extends foundry.documents.Item {
 
     async toChat(origin) {
         const cls = getDocumentClass('ChatMessage');
+        
         const systemData = {
             title:
                 this.type === 'ancestry'
@@ -127,9 +128,10 @@ export default class DHItem extends foundry.documents.Item {
             actions: this.system.actions ?? [],
             source: {
                 actor: this.actor?.uuid ?? this.actor?.id ?? null,
-                item: this.id
+                item: this.uuid ?? this.id
             }
         };
+        
         const msg = new cls({
             type: 'abilityUse',
             user: game.user.id,

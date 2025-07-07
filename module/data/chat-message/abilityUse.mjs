@@ -8,6 +8,10 @@ export default class DHAbilityUse extends foundry.abstract.TypeDataModel {
             img: new fields.StringField({}),
             name: new fields.StringField({}),
             description: new fields.StringField({}),
+            source: new fields.SchemaField({
+                actor: new fields.StringField({ nullable: true }),
+                item: new fields.StringField({ nullable: true })
+            }),
             actions: new fields.ArrayField(
                 new fields.ObjectField({
                     name: new fields.StringField({}),

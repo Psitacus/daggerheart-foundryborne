@@ -283,99 +283,63 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
 
         // Get the action data from the chat message
         const actionData = message.system.actions[Number.parseInt(event.currentTarget.dataset.index)];
+        
         // Get the currently selected actor (from selected token)
         const actor = getCommandTarget();
+        
         if (!actor) {
-            ui.notifications.warn(game.i18n.localize('DAGGERHEART.UI.Notifications.noSelectedToken'));
+            ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.noTokenSelected'));
             return;
         }
 
-        // Try to find the original action from the source item first
-        const sourceActor = message.system.source?.actor ? await foundry.utils.fromUuid(message.system.source.actor) : null;
-        const sourceItem = message.system.source?.item ? sourceActor?.items?.get(message.system.source.item) : null;
-        
-        if (sourceItem && sourceActor) {
-            // Find the specific action on the source item
-            const sourceAction = sourceItem.system.actions?.find(a => a._id === actionData._id);
-            if (sourceAction) {
-                try {
-                    // Temporarily override the action's actor reference to use the selected actor
-                    const originalActor = sourceAction.actor;
-                    const originalItem = sourceAction.item;
-                    
-                    // Create temporary getters that return our selected actor
-                    Object.defineProperty(sourceAction, 'actor', {
-                        get: () => actor,
-                        configurable: true
-                    });
-                    
-                    Object.defineProperty(sourceAction, 'item', {
-                        get: () => ({
-                            ...originalItem,
-                            actor: actor,
-                            parent: actor
-                        }),
-                        configurable: true
-                    });
-                    
-                    // Use the action
-                    await sourceAction.use(event);
-                    
-                    // Restore the original references
-                    Object.defineProperty(sourceAction, 'actor', {
-                        get: () => originalActor,
-                        configurable: true
-                    });
-                    
-                    Object.defineProperty(sourceAction, 'item', {
-                        get: () => originalItem,
-                        configurable: true
-                    });
-                    
-                    return;
-                } catch (e) {
-                    console.error('Error using source action from chat:', e);
-                    // Restore original references if there was an error
-                    delete sourceAction.actor;
-                    delete sourceAction.item;
-                }
-            }
-        }
-
-        // Fallback: Create action using an existing item from the selected actor
         try {
-            // Find any weapon or item on the selected actor to use as a template
-            const actorItems = actor.items.filter(item => item.system.actions?.length > 0);
-            let templateItem = actorItems.find(item => item.system.actions.some(a => a.type === actionData.type));
-            
-            if (!templateItem && actorItems.length > 0) {
-                templateItem = actorItems[0]; // Use any item with actions as a fallback
+            // Get the source item from the chat message
+            const sourceItemUuid = message.system.source?.item;
+            if (!sourceItemUuid) {
+                ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.noSourceItem'));
+                return;
             }
+
+            const sourceItem = await foundry.utils.fromUuid(sourceItemUuid);
+            if (!sourceItem) {
+                ui.notifications.error(game.i18n.localize('DAGGERHEART.UI.Notifications.sourceItemNotFound'));
+                return;
+            }
+
+            // Create a temporary copy of the item with a unique name
+            const tempItemData = sourceItem.toObject();
+            tempItemData._id = foundry.utils.randomID(); // Give it a new ID
+            const originalName = tempItemData.name;
+            tempItemData.name = `${tempItemData.name} (${foundry.utils.randomID()})`;
             
-            if (templateItem) {
-                // Use the template item's action structure but with our action data
-                const { actionsTypes } = await import('../../data/action/_module.mjs');
-                const ActionClass = actionsTypes[actionData.type];
-                
-                if (ActionClass) {
-                    // Create the action with the template item's system as parent
-                    const actionInstance = new ActionClass({
-                        ...actionData,
-                        _id: foundry.utils.randomID(),
-                        name: actionData.name || game.i18n.localize(`DAGGERHEART.ACTIONS.TYPES.${actionData.type}.name`)
-                    }, { parent: templateItem.system });
-                    
-                    await actionInstance.use(event);
+            // Create the temporary item on the selected actor
+            const [tempItem] = await actor.createEmbeddedDocuments('Item', [tempItemData]);
+            
+            // Immediately rename it back to the original name for display purposes
+            await tempItem.update({ name: originalName });
+
+            try {
+                // Find the action on the temporary item
+                const action = tempItem.system.actions?.find(a => a._id === actionData._id);
+                if (!action) {
+                    ui.notifications.error(game.i18n.format('DAGGERHEART.UI.Notifications.actionNotFound', { id: actionData._id }));
                     return;
                 }
+
+                // Use the action
+                await action.use(event);
+                
+            } finally {
+                // Clean up: delete the temporary item
+                await actor.deleteEmbeddedDocuments('Item', [tempItem.id]);
             }
-            
-            // Final fallback - just show a notification
-            ui.notifications.info(`Using ${actionData.name || actionData.type} action with selected token: ${actor.name}`);
             
         } catch (e) {
             console.error('Error using action from chat:', e);
-            ui.notifications.error(`Error using action: ${e.message}`);
+            ui.notifications.error(game.i18n.format('DAGGERHEART.UI.Notifications.actionUseFailed', { 
+                action: actionData.name || actionData.type, 
+                error: e.message 
+            }));
         }
     };
 

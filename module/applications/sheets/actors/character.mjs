@@ -700,7 +700,11 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             img: card.img,
             name: card.name,
             description: card.system.effect,
-            actions: card.system.actions
+            actions: card.system.actions,
+            source: {
+                actor: card.actor?.uuid ?? card.actor?.id ?? null,
+                item: card.uuid ?? card.id
+            }
         };
         const msg = new cls({
             type: 'abilityUse',
@@ -818,7 +822,11 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             img: item.img,
             name: item.name,
             description: item.system.description,
-            actions: item.system.actions
+            actions: item.system.actions,
+            source: {
+                actor: item.actor?.uuid ?? item.actor?.id ?? null,
+                item: item.uuid ?? item.id
+            }
         };
         const msg = new cls({
             type: 'abilityUse',
@@ -839,7 +847,11 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             const cls = getDocumentClass('ChatMessage');
             const systemData = {
                 name: game.i18n.localize('DAGGERHEART.GENERAL.Experience.single'),
-                description: `${experience.name} ${experience.total < 0 ? experience.total : `+${experience.total}`}`
+                description: `${experience.name} ${experience.total < 0 ? experience.total : `+${experience.total}`}`,
+                source: {
+                    actor: this.document.uuid,
+                    item: null
+                }
             };
             const msg = new cls({
                 type: 'abilityUse',
@@ -875,7 +887,11 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             origin: this.document.id,
             name: title,
             img: item.img,
-            description: ability.description
+            description: ability.description,
+            source: {
+                actor: this.document.uuid,
+                item: item.uuid ?? item.id
+            }
         };
         const msg = new cls({
             type: 'abilityUse',
@@ -899,9 +915,14 @@ export default class CharacterSheet extends DaggerheartSheet(ActorSheetV2) {
             origin: this.document.id,
             name: item.name,
             img: item.img,
-            description: item.system.description
+            description: item.system.description,
+            source: {
+                actor: item.actor?.uuid ?? item.actor?.id ?? null,
+                item: item.uuid ?? item.id
+            }
         };
         const msg = new cls({
+            type: 'abilityUse',
             user: game.user.id,
             system: systemData,
             content: await foundry.applications.handlebars.renderTemplate(
