@@ -604,11 +604,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
             const cls = getDocumentClass('ChatMessage');
             const systemData = {
                 name: game.i18n.localize('DAGGERHEART.GENERAL.Experience.single'),
-                description: `${experience.name} ${experience.total < 0 ? experience.total : `+${experience.total}`}`,
-                source: {
-                    actor: this.document.uuid,
-                    item: null
-                }
+                description: `${experience.name} ${experience.total < 0 ? experience.total : `+${experience.total}`}`
             };
             const msg = new cls({
                 type: 'abilityUse',
