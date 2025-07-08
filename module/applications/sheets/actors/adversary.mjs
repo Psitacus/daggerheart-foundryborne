@@ -94,11 +94,7 @@ export default class AdversarySheet extends DHBaseActorSheet {
                 name: game.i18n.localize('DAGGERHEART.GENERAL.Experience.single'),
                 description: `${experience.name} ${
                     experience.modifier < 0 ? experience.modifier : `+${experience.modifier}`
-                }`,
-                source: {
-                    actor: this.document.uuid,
-                    item: null
-                }
+                }`
             };
             const msg = new cls({
                 type: 'abilityUse',
