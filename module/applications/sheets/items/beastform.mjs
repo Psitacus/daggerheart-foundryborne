@@ -3,7 +3,8 @@ import DHBaseItemSheet from '../api/base-item.mjs';
 export default class BeastformSheet extends DHBaseItemSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
-        classes: ['beastform']
+        classes: ['beastform'],
+        window: { resizable: true }
     };
 
     /**@override */

@@ -4,6 +4,7 @@ export default class ConsumableSheet extends DHBaseItemSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
         classes: ['consumable'],
+        window: { resizable: true },
         position: { width: 550 }
     };
 

@@ -3,7 +3,8 @@ import DHHeritageSheet from '../api/heritage-sheet.mjs';
 export default class AncestrySheet extends DHHeritageSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
-        classes: ['ancestry']
+        classes: ['ancestry'],
+        window: { resizable: true }
     };
 
     /**@inheritdoc */

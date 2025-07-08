@@ -4,6 +4,7 @@ export default class MiscellaneousSheet extends DHBaseItemSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
         classes: ['miscellaneous'],
+        window: { resizable: true },
         position: { width: 550 }
     };
 

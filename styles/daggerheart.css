@@ -1897,31 +1897,87 @@ fieldset.daggerheart.chat .daggerheart.chat {
 .daggerheart.sheet.class .class-feature button {
   width: 40px;
 }
-.daggerheart.sheet.armor .window-content {
+.daggerheart.sheet.armor .window-content,
+.daggerheart.sheet.weapon .window-content,
+.daggerheart.sheet.beastform .window-content,
+.daggerheart.sheet.consumable .window-content,
+.daggerheart.sheet.subclass .window-content,
+.daggerheart.sheet.miscellaneous .window-content,
+.daggerheart.sheet.domain-card .window-content,
+.daggerheart.sheet.community .window-content,
+.daggerheart.sheet.ancestry .window-content {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: auto;
 }
-.daggerheart.sheet.armor .tab {
+.daggerheart.sheet.armor .tab,
+.daggerheart.sheet.weapon .tab,
+.daggerheart.sheet.beastform .tab,
+.daggerheart.sheet.consumable .tab,
+.daggerheart.sheet.subclass .tab,
+.daggerheart.sheet.miscellaneous .tab,
+.daggerheart.sheet.domain-card .tab,
+.daggerheart.sheet.community .tab,
+.daggerheart.sheet.ancestry .tab {
   flex: 1;
   min-height: 0;
   display: none;
 }
-.daggerheart.sheet.armor .tab.active {
+.daggerheart.sheet.armor .tab.active,
+.daggerheart.sheet.weapon .tab.active,
+.daggerheart.sheet.beastform .tab.active,
+.daggerheart.sheet.consumable .tab.active,
+.daggerheart.sheet.subclass .tab.active,
+.daggerheart.sheet.miscellaneous .tab.active,
+.daggerheart.sheet.domain-card .tab.active,
+.daggerheart.sheet.community .tab.active,
+.daggerheart.sheet.ancestry .tab.active {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-.daggerheart.sheet.armor .tab fieldset {
+.daggerheart.sheet.armor .tab fieldset,
+.daggerheart.sheet.weapon .tab fieldset,
+.daggerheart.sheet.beastform .tab fieldset,
+.daggerheart.sheet.consumable .tab fieldset,
+.daggerheart.sheet.subclass .tab fieldset,
+.daggerheart.sheet.miscellaneous .tab fieldset,
+.daggerheart.sheet.domain-card .tab fieldset,
+.daggerheart.sheet.community .tab fieldset,
+.daggerheart.sheet.ancestry .tab fieldset {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 .daggerheart.sheet.armor .tab fieldset .actions-list,
+.daggerheart.sheet.weapon .tab fieldset .actions-list,
+.daggerheart.sheet.beastform .tab fieldset .actions-list,
+.daggerheart.sheet.consumable .tab fieldset .actions-list,
+.daggerheart.sheet.subclass .tab fieldset .actions-list,
+.daggerheart.sheet.miscellaneous .tab fieldset .actions-list,
+.daggerheart.sheet.domain-card .tab fieldset .actions-list,
+.daggerheart.sheet.community .tab fieldset .actions-list,
+.daggerheart.sheet.ancestry .tab fieldset .actions-list,
 .daggerheart.sheet.armor .tab fieldset.two-columns,
-.daggerheart.sheet.armor .tab fieldset.one-column {
+.daggerheart.sheet.weapon .tab fieldset.two-columns,
+.daggerheart.sheet.beastform .tab fieldset.two-columns,
+.daggerheart.sheet.consumable .tab fieldset.two-columns,
+.daggerheart.sheet.subclass .tab fieldset.two-columns,
+.daggerheart.sheet.miscellaneous .tab fieldset.two-columns,
+.daggerheart.sheet.domain-card .tab fieldset.two-columns,
+.daggerheart.sheet.community .tab fieldset.two-columns,
+.daggerheart.sheet.ancestry .tab fieldset.two-columns,
+.daggerheart.sheet.armor .tab fieldset.one-column,
+.daggerheart.sheet.weapon .tab fieldset.one-column,
+.daggerheart.sheet.beastform .tab fieldset.one-column,
+.daggerheart.sheet.consumable .tab fieldset.one-column,
+.daggerheart.sheet.subclass .tab fieldset.one-column,
+.daggerheart.sheet.miscellaneous .tab fieldset.one-column,
+.daggerheart.sheet.domain-card .tab fieldset.one-column,
+.daggerheart.sheet.community .tab fieldset.one-column,
+.daggerheart.sheet.ancestry .tab fieldset.one-column {
   flex: 1;
   overflow-y: auto;
   min-height: 0;

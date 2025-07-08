@@ -6,6 +6,7 @@ export default class ClassSheet extends DHBaseItemSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
         classes: ['class'],
+        window: { resizable: true },
         position: { width: 700 },
         actions: {
             removeItemFromCollection: ClassSheet.#removeItemFromCollection,

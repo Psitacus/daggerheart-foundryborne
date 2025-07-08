@@ -3,7 +3,8 @@ import DHHeritageSheet from '../api/heritage-sheet.mjs';
 export default class CommunitySheet extends DHHeritageSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
-        classes: ['community']
+        classes: ['community'],
+        window: { resizable: true }
     };
 
     /**@inheritdoc */

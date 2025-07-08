@@ -4,6 +4,7 @@ export default class WeaponSheet extends DHBaseItemSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
         classes: ['weapon'],
+        window: { resizable: true },
         tagifyConfigs: [
             {
                 selector: '.features-input',
