@@ -4,6 +4,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
         classes: ['armor'],
+        window: { resizable: true },
         dragDrop: [{ dragSelector: null, dropSelector: null }],
         tagifyConfigs: [
             {

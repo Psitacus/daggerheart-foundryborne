@@ -1897,6 +1897,60 @@ fieldset.daggerheart.chat .daggerheart.chat {
 .daggerheart.sheet.class .class-feature button {
   width: 40px;
 }
+.daggerheart.sheet.armor .window-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  /* Allow outer scrolling when content is too large */
+}
+.daggerheart.sheet.armor .item-sheet-header {
+  flex-shrink: 0;
+  /* Keep header visible */
+}
+.daggerheart.sheet.armor .tab-navigation {
+  flex-shrink: 0;
+  /* Don't shrink the navigation */
+}
+.daggerheart.sheet.armor .tab {
+  flex: 1;
+  min-height: 0;
+  /* Allow the tab to shrink */
+  display: none;
+  /* Hide all tabs by default */
+}
+.daggerheart.sheet.armor .tab.active {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Let the inner container handle scrolling */
+}
+.daggerheart.sheet.armor .tab fieldset {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.daggerheart.sheet.armor .tab fieldset legend {
+  flex-shrink: 0;
+  /* Keep legend visible */
+}
+.daggerheart.sheet.armor .tab fieldset .actions-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: light-dark(#18162e, #f3c267) transparent;
+}
+.daggerheart.sheet.armor .tab fieldset.two-columns,
+.daggerheart.sheet.armor .tab fieldset.one-column {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: light-dark(#18162e, #f3c267) transparent;
+}
 .daggerheart.sheet .domain-card-description .editor {
   height: 300px;
 }
