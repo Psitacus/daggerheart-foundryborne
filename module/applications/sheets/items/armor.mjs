@@ -56,7 +56,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
                 context.features = this.document.system.features.map(x => x.value);
                 break;
             case 'attachments':
-                const attachedUUIDs = this.document.system.attached || [];
+                const attachedUUIDs = this.document.system.attached;
                 context.attachedItems = await Promise.all(
                     attachedUUIDs.map(async uuid => {
                         const item = await fromUuid(uuid);
@@ -97,7 +97,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
         const item = await Item.implementation.fromDropData(data);
         if (!item) return;
         
-        const currentAttached = this.document.system.attached || [];
+        const currentAttached = this.document.system.attached;
         const newUUID = item.uuid;
         
         if (currentAttached.includes(newUUID)) {
@@ -147,7 +147,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
      */
     static async #removeAttachment(event, target) {
         const uuid = target.dataset.uuid;
-        const currentAttached = this.document.system.attached || [];
+        const currentAttached = this.document.system.attached;
         
         await this.document.update({
             'system.attached': currentAttached.filter(attachedUuid => attachedUuid !== uuid)
