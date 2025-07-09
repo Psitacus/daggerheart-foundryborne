@@ -1070,7 +1070,8 @@
                 "mastery": "Mastery",
                 "optional": "Optional",
                 "setup": "Setup",
-                "equipment": "Equipment"
+                "equipment": "Equipment",
+                "attachments": "Attachments"
             },
             "Tiers": {
                 "singular": "Tier",

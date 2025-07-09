@@ -40,6 +40,7 @@ export default class DHArmor extends BaseDataItem {
                 major: new fields.NumberField({ integer: true, initial: 0 }),
                 severe: new fields.NumberField({ integer: true, initial: 0 })
             }),
+            attached: new fields.ArrayField(new fields.StringField()),
             actions: new fields.ArrayField(new ActionField())
         };
     }
