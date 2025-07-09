@@ -33,7 +33,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
             scrollable: ['.settings']
         },
         attachments: {
-            template: 'systems/daggerheart/templates/sheets/items/armor/attachments.hbs',
+            template: 'systems/daggerheart/templates/sheets/global/tabs/tab-attachments.hbs',
             scrollable: ['.attachments']
         }
     };

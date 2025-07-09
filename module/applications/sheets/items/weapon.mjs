@@ -34,7 +34,7 @@ export default class WeaponSheet extends DHBaseItemSheet {
             scrollable: ['.settings']
         },
         attachments: {
-            template: 'systems/daggerheart/templates/sheets/items/weapon/attachments.hbs',
+            template: 'systems/daggerheart/templates/sheets/global/tabs/tab-attachments.hbs',
             scrollable: ['.attachments']
         }
     };
