@@ -72,6 +72,10 @@ export default class ArmorSheet extends DHBaseItemSheet {
         await this.document.update({ 'system.features': selectedOptions.map(x => ({ value: x.value })) });
     }
 
+    /* -------------------------------------------- */
+    /*  Drag and Drop                               */
+    /* -------------------------------------------- */
+
     /**
      * Handle dropping items onto the attachments section
      * @param {DragEvent} event - The drop event
@@ -94,6 +98,10 @@ export default class ArmorSheet extends DHBaseItemSheet {
             parentType: 'armor'
         });
     }
+
+    /* -------------------------------------------- */
+    /*  Application Clicks Actions                  */
+    /* -------------------------------------------- */
 
     /**
      * Remove an attached item
