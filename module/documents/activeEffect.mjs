@@ -38,13 +38,13 @@ export default class DhActiveEffect extends ActiveEffect {
     get isAttached() {
         if (!this.parent || !this.parent.parent) return false;
         
-        // Check if this item's UUID is in any actor's armor attachment lists
+        // Check if this item's UUID is in any actor's armor or weapon attachment lists
         const actor = this.parent.parent;
         if (!actor || !actor.items) return false;
         
         try {
             return actor.items.some(item => {
-                return item.type === 'armor' && 
+                return (item.type === 'armor' || item.type === 'weapon') && 
                        item.system?.attached && 
                        Array.isArray(item.system.attached) &&
                        item.system.attached.includes(this.parent.uuid);

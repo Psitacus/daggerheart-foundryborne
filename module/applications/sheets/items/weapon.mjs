@@ -109,8 +109,6 @@ export default class WeaponSheet extends DHBaseItemSheet {
         const item = await Item.implementation.fromDropData(data);
         if (!item) return;
         
-        console.log(`Dropping item ${item.name} (${item.uuid}) onto weapon ${this.document.name}`);
-        
         // Get current attached UUIDs
         const currentAttached = this.document.system.attached || [];
         const newUUID = item.uuid;
@@ -121,11 +119,7 @@ export default class WeaponSheet extends DHBaseItemSheet {
             return;
         }
         
-        console.log(`Current attached items:`, currentAttached);
-        console.log(`Adding new UUID:`, newUUID);
-        
         const updatedAttached = [...currentAttached, newUUID];
-        console.log(`Updating weapon with attached items:`, updatedAttached);
         
         await this.document.update({
             'system.attached': updatedAttached
@@ -135,8 +129,6 @@ export default class WeaponSheet extends DHBaseItemSheet {
         // Both attachment-only and regular effects should be copied when attached
         const actor = this.document.parent;
         if (actor && item.effects.size > 0 && this.document.system.equipped) {
-            console.log(`Checking ${item.effects.size} effects from attached item ${item.name}`);
-            
             const effectsToCreate = [];
             for (const effect of item.effects) {
                 // Copy ALL effects when item is attached - attachment-only flag only matters for non-attached items
@@ -154,22 +146,12 @@ export default class WeaponSheet extends DHBaseItemSheet {
                     }
                 };
                 effectsToCreate.push(effectData);
-                
-                const isAttachmentOnly = effect.flags?.daggerheart?.attachmentOnly === true;
-                console.log(`Effect ${effect.name} (attachment-only: ${isAttachmentOnly}) will be copied to actor`);
             }
             
             if (effectsToCreate.length > 0) {
-                const createdEffects = await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
-                console.log(`Created ${createdEffects.length} effects on actor from attached item`);
-            } else {
-                console.log(`No effects found on ${item.name}, no effects copied to actor`);
+                await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
             }
-        } else if (item.effects.size > 0 && !this.document.system.equipped) {
-            console.log(`Weapon ${this.document.name} is not equipped, attachment effects will be applied when equipped`);
         }
-        
-        console.log(`Weapon updated successfully`);
     }
 
     /**
@@ -197,7 +179,6 @@ export default class WeaponSheet extends DHBaseItemSheet {
             });
             
             if (effectsToRemove.length > 0) {
-                console.log(`Removing ${effectsToRemove.length} effects from actor that came from detached item ${uuid}`);
                 await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove.map(e => e.id));
             }
         }

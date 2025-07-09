@@ -133,8 +133,6 @@ export default class DHWeapon extends BaseDataItem {
 
         if (newEquippedStatus) {
             // Weapon is being equipped - add attachment effects
-            console.log(`Weapon ${this.parent.name} being equipped, adding attachment effects`);
-            
             const effectsToCreate = [];
             for (const attachedUuid of this.attached) {
                 const attachedItem = await fromUuid(attachedUuid);
@@ -161,12 +159,9 @@ export default class DHWeapon extends BaseDataItem {
             
             if (effectsToCreate.length > 0) {
                 await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
-                console.log(`Created ${effectsToCreate.length} attachment effects on actor`);
             }
         } else {
             // Weapon is being unequipped - remove attachment effects
-            console.log(`Weapon ${this.parent.name} being unequipped, removing attachment effects`);
-            
             const effectsToRemove = actor.effects.filter(effect => {
                 const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
                 return attachmentSource && attachmentSource.weaponUuid === this.parent.uuid;
@@ -174,7 +169,6 @@ export default class DHWeapon extends BaseDataItem {
             
             if (effectsToRemove.length > 0) {
                 await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove.map(e => e.id));
-                console.log(`Removed ${effectsToRemove.length} attachment effects from actor`);
             }
         }
     }
