@@ -686,6 +686,10 @@ export default class CharacterSheet extends DHBaseActorSheet {
     }
 
     async _onDrop(event) {
+        // Prevent event bubbling to avoid duplicate handling
+        event.preventDefault();
+        event.stopPropagation();
+        
         super._onDrop(event);
         this._onDropItem(event, TextEditor.getDragEventData(event));
     }
