@@ -29,7 +29,12 @@ export default class CharacterSheet extends DHBaseActorSheet {
         window: {
             resizable: true
         },
-        dragDrop: [],
+        dragDrop: [
+            {
+                dragSelector: '[data-item-id][draggable="true"]',
+                dropSelector: null
+            }
+        ],
         contextMenus: [
             {
                 handler: CharacterSheet._getContextMenuOptions,
@@ -650,7 +655,33 @@ export default class CharacterSheet extends DHBaseActorSheet {
         }
     }
 
-    async _onDragStart(_, event) {
+    async _onDragStart(event) {
+        const target = event.target || event.currentTarget;
+        const itemElement = target.closest('[data-item-id]');
+        
+        if (itemElement) {
+            const itemId = itemElement.dataset.itemId;
+            const itemType = itemElement.dataset.type;
+            
+            let item;
+            if (itemType === 'effect') {
+                item = this.document.effects.get(itemId);
+            } else {
+                item = this.document.items.get(itemId);
+            }
+            
+            if (item) {
+                const dragData = {
+                    type: item.documentName,
+                    uuid: item.uuid
+                };
+                
+                event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+                
+                
+            }
+        }
+        
         super._onDragStart(event);
     }
 
