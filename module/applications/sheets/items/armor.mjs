@@ -5,7 +5,6 @@ export default class ArmorSheet extends DHBaseItemSheet {
     static DEFAULT_OPTIONS = {
         classes: ['armor'],
         dragDrop: [
-            { dragSelector: null, dropSelector: null },
             { dragSelector: null, dropSelector: '.attachments-section' }
         ],
         actions: {
