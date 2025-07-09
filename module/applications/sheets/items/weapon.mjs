@@ -62,20 +62,12 @@ export default class WeaponSheet extends DHBaseItemSheet {
                 const attachedUUIDs = this.document.system.attached || [];
                 context.attachedItems = await Promise.all(
                     attachedUUIDs.map(async uuid => {
-                        try {
-                            const item = await fromUuid(uuid);
-                            return {
-                                uuid: uuid,
-                                name: item?.name || 'Unknown Item',
-                                img: item?.img || 'icons/svg/item-bag.svg'
-                            };
-                        } catch (error) {
-                            return {
-                                uuid: uuid,
-                                name: 'Unknown Item',
-                                img: 'icons/svg/item-bag.svg'
-                            };
-                        }
+                        const item = await fromUuid(uuid);
+                        return {
+                            uuid: uuid,
+                            name: item?.name || 'Unknown Item',
+                            img: item?.img || 'icons/svg/item-bag.svg'
+                        };
                     })
                 );
                 break;
