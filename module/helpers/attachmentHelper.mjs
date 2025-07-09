@@ -105,22 +105,24 @@ export async function removeAttachmentFromItem({ parentItem, attachedUuid, paren
  * @returns {Promise<void>}
  */
 export async function handleAttachmentEffectsOnEquipChange({ parentItem, newEquippedStatus, parentType }) {
-    const actor = parentItem.parent?.parent;
-    if (!actor || !parentItem.system.attached?.length) return;
+    // Try to get the actor - it might be parentItem.parent instead of parentItem.parent.parent
+    const actor = parentItem.parent?.type === 'character' ? parentItem.parent : parentItem.parent?.parent;
+    
+    if (!actor || !parentItem.system.attached?.length) {
+        return;
+    }
 
     if (newEquippedStatus) {
         // Item is being equipped - add attachment effects
-        const effectsToCreate = [];
         for (const attachedUuid of parentItem.system.attached) {
             const attachedItem = await fromUuid(attachedUuid);
             if (attachedItem && attachedItem.effects.size > 0) {
-                const newEffects = await copyAttachmentEffectsToActor({
+                await copyAttachmentEffectsToActor({
                     parentItem,
                     attachedItem,
                     attachedUuid,
                     parentType
                 });
-                effectsToCreate.push(...newEffects);
             }
         }
     } else {

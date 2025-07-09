@@ -11,6 +11,46 @@ export default class DHItem extends foundry.documents.Item {
 
     /**
      * @inheritdoc
+     */
+    async _preUpdate(changed, options, user) {
+        const result = await super._preUpdate(changed, options, user);
+        
+        // Store the previous equipped status for attachment handling
+        if (changed.system?.equipped !== undefined) {
+            options.previousEquipped = this.system.equipped;
+        }
+        
+        return result;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async _onUpdate(changed, options, user) {
+        await super._onUpdate(changed, options, user);
+        
+        // Handle attachment effects when equipped status changes
+        if (changed.system?.equipped !== undefined && options.previousEquipped !== changed.system.equipped) {
+            const newEquippedStatus = changed.system.equipped;
+            const parentType = this.type === 'armor' ? 'armor' : this.type === 'weapon' ? 'weapon' : null;
+            
+            if (parentType) {
+                try {
+                    const { handleAttachmentEffectsOnEquipChange } = await import('../helpers/attachmentHelper.mjs');
+                    await handleAttachmentEffectsOnEquipChange({
+                        parentItem: this,
+                        newEquippedStatus,
+                        parentType
+                    });
+                } catch (error) {
+                    console.error('DH | Error in handleAttachmentEffectsOnEquipChange:', error);
+                }
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
      * @param {object} options - Options which modify the getRollData method.
      * @returns
      */
