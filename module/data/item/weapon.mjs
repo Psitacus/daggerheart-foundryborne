@@ -1,6 +1,7 @@
 import BaseDataItem from './base.mjs';
 import { actionsTypes } from '../action/_module.mjs';
 import ActionField from '../fields/actionField.mjs';
+import { handleAttachmentEffectsOnEquipChange } from '../../helpers/attachmentHelper.mjs';
 
 export default class DHWeapon extends BaseDataItem {
     /** @inheritDoc */
@@ -81,7 +82,11 @@ export default class DHWeapon extends BaseDataItem {
 
         // Handle equipped status changes for attachment effects
         if (changes.system?.equipped !== undefined && changes.system.equipped !== this.equipped) {
-            await this._handleAttachmentEffectsOnEquipChange(changes.system.equipped);
+            await handleAttachmentEffectsOnEquipChange({
+                parentItem: this.parent,
+                newEquippedStatus: changes.system.equipped,
+                parentType: 'weapon'
+            });
         }
 
         if (changes.system?.features) {
@@ -119,56 +124,6 @@ export default class DHWeapon extends BaseDataItem {
                     changes.system.actions = [...this.actions, ...newActions];
                     weaponFeature.actionIds = newActions.map(x => x._id);
                 }
-            }
-        }
-    }
-
-    /**
-     * Handle adding/removing attachment effects when weapon is equipped/unequipped
-     * @param {boolean} newEquippedStatus - The new equipped status
-     */
-    async _handleAttachmentEffectsOnEquipChange(newEquippedStatus) {
-        const actor = this.parent.parent;
-        if (!actor || !this.attached?.length) return;
-
-        if (newEquippedStatus) {
-            // Weapon is being equipped - add attachment effects
-            const effectsToCreate = [];
-            for (const attachedUuid of this.attached) {
-                const attachedItem = await fromUuid(attachedUuid);
-                if (attachedItem && attachedItem.effects.size > 0) {
-                    for (const effect of attachedItem.effects) {
-                        // Copy ALL effects when item is attached - attachment-only flag only matters for non-attached items
-                        const effectData = effect.toObject();
-                        effectData.origin = `${this.parent.uuid}:${attachedUuid}`;
-                        effectData.flags = {
-                            ...effectData.flags,
-                            daggerheart: {
-                                ...effectData.flags?.daggerheart,
-                                attachmentSource: {
-                                    weaponUuid: this.parent.uuid,
-                                    itemUuid: attachedUuid,
-                                    originalEffectId: effect.id
-                                }
-                            }
-                        };
-                        effectsToCreate.push(effectData);
-                    }
-                }
-            }
-            
-            if (effectsToCreate.length > 0) {
-                await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
-            }
-        } else {
-            // Weapon is being unequipped - remove attachment effects
-            const effectsToRemove = actor.effects.filter(effect => {
-                const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
-                return attachmentSource && attachmentSource.weaponUuid === this.parent.uuid;
-            });
-            
-            if (effectsToRemove.length > 0) {
-                await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove.map(e => e.id));
             }
         }
     }

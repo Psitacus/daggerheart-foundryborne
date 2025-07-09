@@ -9,7 +9,7 @@
     {{#if isItemEffect}}
     {{formGroup fields.transfer value=source.transfer rootId=rootId label=legacyTransfer.label hint=legacyTransfer.hint}}
     
-    {{!-- Attachment-only flag for item effects --}}
+    {{!-- Attachment-only flag for item effects TODO figure out how to do this with formGroups--}}
     <div class="form-group">
         <label for="{{rootId}}-attachmentOnly">{{localize "DAGGERHEART.Effect.AttachmentOnly.Label"}}</label>
         <input type="checkbox" id="{{rootId}}-attachmentOnly" name="flags.daggerheart.attachmentOnly" {{#if source.flags.daggerheart.attachmentOnly}}checked{{/if}}>

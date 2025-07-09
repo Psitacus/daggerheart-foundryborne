@@ -1,4 +1,5 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
+import { copyAttachmentEffectsToActor, removeAttachmentEffectsFromActor } from '../../../helpers/attachmentHelper.mjs';
 
 export default class ArmorSheet extends DHBaseItemSheet {
     /**@inheritdoc */
@@ -130,28 +131,12 @@ export default class ArmorSheet extends DHBaseItemSheet {
         // Both attachment-only and regular effects should be copied when attached
         const actor = this.document.parent;
         if (actor && item.effects.size > 0 && this.document.system.equipped) {
-            const effectsToCreate = [];
-            for (const effect of item.effects) {
-                // Copy ALL effects when item is attached - attachment-only flag only matters for non-attached items
-                const effectData = effect.toObject();
-                effectData.origin = `${this.document.uuid}:${newUUID}`; // Track which armor and which item this came from
-                effectData.flags = {
-                    ...effectData.flags,
-                    daggerheart: {
-                        ...effectData.flags?.daggerheart,
-                        attachmentSource: {
-                            armorUuid: this.document.uuid,
-                            itemUuid: newUUID,
-                            originalEffectId: effect.id
-                        }
-                    }
-                };
-                effectsToCreate.push(effectData);
-            }
-            
-            if (effectsToCreate.length > 0) {
-                await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
-            }
+            await copyAttachmentEffectsToActor({
+                parentItem: this.document,
+                attachedItem: item,
+                attachedUuid: newUUID,
+                parentType: 'armor'
+            });
         }
     }
 
@@ -170,18 +155,10 @@ export default class ArmorSheet extends DHBaseItemSheet {
         });
         
         // Remove any effects on the actor that came from this attached item
-        const actor = this.document.parent;
-        if (actor) {
-            const effectsToRemove = actor.effects.filter(effect => {
-                const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
-                return attachmentSource && 
-                       attachmentSource.armorUuid === this.document.uuid && 
-                       attachmentSource.itemUuid === uuid;
-            });
-            
-            if (effectsToRemove.length > 0) {
-                await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove.map(e => e.id));
-            }
-        }
+        await removeAttachmentEffectsFromActor({
+            parentItem: this.document,
+            attachedUuid: uuid,
+            parentType: 'armor'
+        });
     }
 }
