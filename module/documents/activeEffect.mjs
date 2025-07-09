@@ -6,8 +6,9 @@ export default class DhActiveEffect extends ActiveEffect {
             return false;
         }
 
-        // First check for attachment-only effects - these should be suppressed unless attached
-        if (this.isAttachmentOnly && !this.isAttached) {
+        // First check for attachment-only effects - these should ALWAYS be suppressed on the original item
+        // They only work through copied versions when attached
+        if (this.isAttachmentOnly) {
             return true;
         }
 
@@ -42,17 +43,12 @@ export default class DhActiveEffect extends ActiveEffect {
         const actor = this.parent.parent;
         if (!actor || !actor.items) return false;
         
-        try {
-            return actor.items.some(item => {
-                return (item.type === 'armor' || item.type === 'weapon') && 
-                       item.system?.attached && 
-                       Array.isArray(item.system.attached) &&
-                       item.system.attached.includes(this.parent.uuid);
-            });
-        } catch (error) {
-            console.warn('Error checking if item is attached:', error);
-            return false;
-        }
+        return actor.items.some(item => {
+            return (item.type === 'armor' || item.type === 'weapon') && 
+                   item.system?.attached && 
+                   Array.isArray(item.system.attached) &&
+                   item.system.attached.includes(this.parent.uuid);
+        });
     }
 
     async _preCreate(data, options, user) {

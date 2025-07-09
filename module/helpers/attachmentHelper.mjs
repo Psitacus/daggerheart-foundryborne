@@ -191,26 +191,4 @@ export async function addAttachmentToItem({ parentItem, droppedItem, parentType 
     }
 }
 
-/**
- * Remove an attachment from an item and clean up its effects
- * @param {Object} options - Configuration options
- * @param {Item} options.parentItem - The item (armor/weapon) that the item is attached to
- * @param {string} options.attachedUuid - UUID of the attached item being removed
- * @param {string} options.parentType - Type of parent item ("armor" or "weapon")
- * @returns {Promise<void>}
- */
-export async function removeAttachmentFromItem({ parentItem, attachedUuid, parentType }) {
-    const currentAttached = parentItem.system.attached;
-    
-    // Remove the attachment from the parent item's attached array
-    await parentItem.update({
-        'system.attached': currentAttached.filter(uuid => uuid !== attachedUuid)
-    });
-    
-    // Remove any effects that came from this attachment
-    await removeAttachmentEffectsFromActor({
-        parentItem,
-        attachedUuid,
-        parentType
-    });
-}
+
