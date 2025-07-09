@@ -56,7 +56,6 @@ export default class ArmorSheet extends DHBaseItemSheet {
                 context.features = this.document.system.features.map(x => x.value);
                 break;
             case 'attachments':
-                // Prepare attached items for display
                 const attachedUUIDs = this.document.system.attached || [];
                 context.attachedItems = await Promise.all(
                     attachedUUIDs.map(async uuid => {
@@ -89,23 +88,18 @@ export default class ArmorSheet extends DHBaseItemSheet {
     async _onDrop(event) {
         const data = TextEditor.getDragEventData(event);
         
-        // Check if dropped on attachments section
         const attachmentsSection = event.target.closest('.attachments-section');
         if (!attachmentsSection) return super._onDrop(event);
         
-        // Prevent event bubbling
         event.preventDefault();
         event.stopPropagation();
         
-        // Get the item being dropped
         const item = await Item.implementation.fromDropData(data);
         if (!item) return;
         
-        // Get current attached UUIDs
         const currentAttached = this.document.system.attached || [];
         const newUUID = item.uuid;
         
-        // Don't attach if already attached
         if (currentAttached.includes(newUUID)) {
             ui.notifications.warn(`${item.name} is already attached to this armor.`);
             return;
@@ -155,12 +149,10 @@ export default class ArmorSheet extends DHBaseItemSheet {
         const uuid = target.dataset.uuid;
         const currentAttached = this.document.system.attached || [];
         
-        // Remove the attachment from the armor
         await this.document.update({
             'system.attached': currentAttached.filter(attachedUuid => attachedUuid !== uuid)
         });
         
-        // Remove any effects on the actor that came from this attached item
         const actor = this.document.parent;
         if (actor) {
             const effectsToRemove = actor.effects.filter(effect => {
