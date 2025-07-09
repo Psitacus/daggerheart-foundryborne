@@ -656,31 +656,14 @@ export default class CharacterSheet extends DHBaseActorSheet {
     }
 
     async _onDragStart(event) {
-        const target = event.target || event.currentTarget;
-        const itemElement = target.closest('[data-item-id]');
+        const item = this.getItem(event);
         
-        if (itemElement) {
-            const itemId = itemElement.dataset.itemId;
-            const itemType = itemElement.dataset.type;
-            
-            let item;
-            if (itemType === 'effect') {
-                item = this.document.effects.get(itemId);
-            } else {
-                item = this.document.items.get(itemId);
-            }
-            
-            if (item) {
-                const dragData = {
-                    type: item.documentName,
-                    uuid: item.uuid
-                };
-                
-                event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-                
-                
-            }
-        }
+        const dragData = {
+            type: item.documentName,
+            uuid: item.uuid
+        };
+        
+        event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
         
         super._onDragStart(event);
     }

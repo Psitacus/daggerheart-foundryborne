@@ -1,5 +1,5 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
-import { copyAttachmentEffectsToActor, removeAttachmentEffectsFromActor } from '../../../helpers/attachmentHelper.mjs';
+import { copyAttachmentEffectsToActor, removeAttachmentFromItem } from '../../../helpers/attachmentHelper.mjs';
 
 export default class WeaponSheet extends DHBaseItemSheet {
     /**@inheritdoc */
@@ -130,16 +130,9 @@ export default class WeaponSheet extends DHBaseItemSheet {
      * @param {HTMLElement} target - The clicked element
      */
     static async #removeAttachment(event, target) {
-        const uuid = target.dataset.uuid;
-        const currentAttached = this.document.system.attached;
-        
-        await this.document.update({
-            'system.attached': currentAttached.filter(attachedUuid => attachedUuid !== uuid)
-        });
-        
-        await removeAttachmentEffectsFromActor({
+        await removeAttachmentFromItem({
             parentItem: this.document,
-            attachedUuid: uuid,
+            attachedUuid: target.dataset.uuid,
             parentType: 'weapon'
         });
     }
