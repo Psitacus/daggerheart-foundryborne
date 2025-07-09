@@ -207,7 +207,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
 
         return [
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.UseItem',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.useItem',
                 icon: '<i class="fa-solid fa-burst"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -216,7 +216,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: (button, event) => CharacterSheet.useItem.call(this, event, button)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Equip',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.equip',
                 icon: '<i class="fa-solid fa-hands"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -225,7 +225,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: CharacterSheet.#toggleEquipItem.bind(this)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Unequip',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.unequip',
                 icon: '<i class="fa-solid fa-hands"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -234,7 +234,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: CharacterSheet.#toggleEquipItem.bind(this)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.ToLoadout',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.toLoadout',
                 icon: '<i class="fa-solid fa-arrow-up"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -243,7 +243,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: target => getItem(target).update({ 'system.inVault': false })
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.ToVault',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.toVault',
                 icon: '<i class="fa-solid fa-arrow-down"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -252,17 +252,17 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: target => getItem(target).update({ 'system.inVault': true })
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.SendToChat',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.sendToChat',
                 icon: '<i class="fa-regular fa-message"></i>',
                 callback: CharacterSheet.toChat.bind(this)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Edit',
+                name: 'CONTROLS.CommonEdit',
                 icon: '<i class="fa-solid fa-pen-to-square"></i>',
                 callback: target => getItem(target).sheet.render({ force: true })
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Delete',
+                name: 'CONTROLS.CommonDelete',
                 icon: '<i class="fa-solid fa-trash"></i>',
                 callback: async el => {
                     const item = getItem(el);
