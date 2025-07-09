@@ -51,4 +51,14 @@ export default class DhActiveEffect extends ActiveEffect {
 
         cls.create(msg.toObject());
     }
+
+    /**
+     * Retrieve the Document that this ActiveEffect targets for modification.
+     * @type {Document|null}
+     */
+    get target() {
+        if (this.parent instanceof Actor) return this.parent;
+        if (CONFIG.ActiveEffect.legacyTransferral) return this.transfer ? null : this.parent;
+        return this.transfer ? (this.parent.parent ?? null) : this.parent;
+    }
 }

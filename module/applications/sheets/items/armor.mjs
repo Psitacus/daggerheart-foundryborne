@@ -98,27 +98,71 @@ export default class ArmorSheet extends DHBaseItemSheet {
     async _onDrop(event) {
         const data = TextEditor.getDragEventData(event);
         
-        // Only handle Item drops
-        if (data.type !== 'Item') return;
-        
         // Check if dropped on attachments section
         const attachmentsSection = event.target.closest('.attachments-section');
         if (!attachmentsSection) return super._onDrop(event);
+        
+        // Prevent event bubbling
+        event.preventDefault();
+        event.stopPropagation();
         
         // Get the item being dropped
         const item = await Item.implementation.fromDropData(data);
         if (!item) return;
         
+        console.log(`Dropping item ${item.name} (${item.uuid}) onto armor ${this.document.name}`);
+        
         // Get current attached UUIDs
         const currentAttached = this.document.system.attached || [];
         const newUUID = item.uuid;
         
-        // Prevent duplicates
-        if (currentAttached.includes(newUUID)) return;
+        // Don't attach if already attached
+        if (currentAttached.includes(newUUID)) {
+            ui.notifications.warn(`${item.name} is already attached to this armor.`);
+            return;
+        }
+        
+        console.log(`Current attached items:`, currentAttached);
+        console.log(`Adding new UUID:`, newUUID);
+        
+        const updatedAttached = [...currentAttached, newUUID];
+        console.log(`Updating armor with attached items:`, updatedAttached);
         
         await this.document.update({
-            'system.attached': [...currentAttached, newUUID]
+            'system.attached': updatedAttached
         });
+        
+        // Copy effects from attached item to actor (only if armor is equipped)
+        const actor = this.document.parent;
+        if (actor && item.effects.size > 0 && this.document.system.equipped) {
+            console.log(`Copying ${item.effects.size} effects from attached item ${item.name} to actor ${actor.name} (armor is equipped)`);
+            
+            const effectsToCreate = [];
+            for (const effect of item.effects) {
+                // Create a copy of the effect with metadata to track its source
+                const effectData = effect.toObject();
+                effectData.origin = `${this.document.uuid}:${newUUID}`; // Track which armor and which item this came from
+                effectData.flags = {
+                    ...effectData.flags,
+                    daggerheart: {
+                        ...effectData.flags?.daggerheart,
+                        attachmentSource: {
+                            armorUuid: this.document.uuid,
+                            itemUuid: newUUID,
+                            originalEffectId: effect.id
+                        }
+                    }
+                };
+                effectsToCreate.push(effectData);
+            }
+            
+            const createdEffects = await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
+            console.log(`Created ${createdEffects.length} effects on actor from attached item`);
+        } else if (item.effects.size > 0 && !this.document.system.equipped) {
+            console.log(`Armor ${this.document.name} is not equipped, attachment effects will be applied when equipped`);
+        }
+        
+        console.log(`Armor updated successfully`);
     }
 
     /**
@@ -130,8 +174,25 @@ export default class ArmorSheet extends DHBaseItemSheet {
         const uuid = target.dataset.uuid;
         const currentAttached = this.document.system.attached || [];
         
+        // Remove the attachment from the armor
         await this.document.update({
             'system.attached': currentAttached.filter(attachedUuid => attachedUuid !== uuid)
         });
+        
+        // Remove any effects on the actor that came from this attached item
+        const actor = this.document.parent;
+        if (actor) {
+            const effectsToRemove = actor.effects.filter(effect => {
+                const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
+                return attachmentSource && 
+                       attachmentSource.armorUuid === this.document.uuid && 
+                       attachmentSource.itemUuid === uuid;
+            });
+            
+            if (effectsToRemove.length > 0) {
+                console.log(`Removing ${effectsToRemove.length} effects from actor that came from detached item ${uuid}`);
+                await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove.map(e => e.id));
+            }
+        }
     }
 }

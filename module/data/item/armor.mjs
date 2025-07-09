@@ -1,6 +1,7 @@
 import BaseDataItem from './base.mjs';
 import ActionField from '../fields/actionField.mjs';
 import { armorFeatures } from '../../config/itemConfig.mjs';
+import { actionsTypes } from '../action/_module.mjs';
 
 export default class DHArmor extends BaseDataItem {
     /** @inheritDoc */
@@ -53,6 +54,11 @@ export default class DHArmor extends BaseDataItem {
         const allowed = await super._preUpdate(changes, options, user);
         if (allowed === false) return false;
 
+        // Handle equipped status changes for attachment effects
+        if (changes.system?.equipped !== undefined && changes.system.equipped !== this.equipped) {
+            await this._handleAttachmentEffectsOnEquipChange(changes.system.equipped);
+        }
+
         if (changes.system.features) {
             const removed = this.features.filter(x => !changes.system.features.includes(x));
             const added = changes.system.features.filter(x => !this.features.includes(x));
@@ -88,6 +94,61 @@ export default class DHArmor extends BaseDataItem {
                     changes.system.actions = [...this.actions, ...newActions];
                     feature.actionIds = newActions.map(x => x._id);
                 }
+            }
+        }
+    }
+
+    /**
+     * Handle adding/removing attachment effects when armor is equipped/unequipped
+     * @param {boolean} newEquippedStatus - The new equipped status
+     */
+    async _handleAttachmentEffectsOnEquipChange(newEquippedStatus) {
+        const actor = this.parent.parent;
+        if (!actor || !this.attached?.length) return;
+
+        if (newEquippedStatus) {
+            // Armor is being equipped - add attachment effects
+            console.log(`Armor ${this.parent.name} being equipped, adding attachment effects`);
+            
+            const effectsToCreate = [];
+            for (const attachedUuid of this.attached) {
+                const attachedItem = await fromUuid(attachedUuid);
+                if (attachedItem && attachedItem.effects.size > 0) {
+                    for (const effect of attachedItem.effects) {
+                        const effectData = effect.toObject();
+                        effectData.origin = `${this.parent.uuid}:${attachedUuid}`;
+                        effectData.flags = {
+                            ...effectData.flags,
+                            daggerheart: {
+                                ...effectData.flags?.daggerheart,
+                                attachmentSource: {
+                                    armorUuid: this.parent.uuid,
+                                    itemUuid: attachedUuid,
+                                    originalEffectId: effect.id
+                                }
+                            }
+                        };
+                        effectsToCreate.push(effectData);
+                    }
+                }
+            }
+            
+            if (effectsToCreate.length > 0) {
+                await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
+                console.log(`Created ${effectsToCreate.length} attachment effects on actor`);
+            }
+        } else {
+            // Armor is being unequipped - remove attachment effects
+            console.log(`Armor ${this.parent.name} being unequipped, removing attachment effects`);
+            
+            const effectsToRemove = actor.effects.filter(effect => {
+                const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
+                return attachmentSource && attachmentSource.armorUuid === this.parent.uuid;
+            });
+            
+            if (effectsToRemove.length > 0) {
+                await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove.map(e => e.id));
+                console.log(`Removed ${effectsToRemove.length} attachment effects from actor`);
             }
         }
     }
