@@ -1,5 +1,5 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
-import { copyAttachmentEffectsToActor, removeAttachmentFromItem } from '../../../helpers/attachmentHelper.mjs';
+import { copyAttachmentEffectsToActor, removeAttachmentFromItem, prepareAttachmentContext, addAttachmentToItem } from '../../../helpers/attachmentHelper.mjs';
 
 export default class WeaponSheet extends DHBaseItemSheet {
     /**@inheritdoc */
@@ -57,17 +57,7 @@ export default class WeaponSheet extends DHBaseItemSheet {
                 context.systemFields.attack.fields = this.document.system.attack.schema.fields;
                 break;
             case 'attachments':
-                const attachedUUIDs = this.document.system.attached;
-                context.attachedItems = await Promise.all(
-                    attachedUUIDs.map(async uuid => {
-                        const item = await fromUuid(uuid);
-                        return {
-                            uuid: uuid,
-                            name: item?.name || 'Unknown Item',
-                            img: item?.img || 'icons/svg/item-bag.svg'
-                        };
-                    })
-                );
+                context.attachedItems = await prepareAttachmentContext(this.document);
                 break;
         }
         return context;
@@ -97,31 +87,11 @@ export default class WeaponSheet extends DHBaseItemSheet {
         const item = await Item.implementation.fromDropData(data);
         if (!item) return;
         
-        const currentAttached = this.document.system.attached;
-        const newUUID = item.uuid;
-        
-        if (currentAttached.includes(newUUID)) {
-            ui.notifications.warn(`${item.name} is already attached to this weapon.`);
-            return;
-        }
-        
-        const updatedAttached = [...currentAttached, newUUID];
-        
-        await this.document.update({
-            'system.attached': updatedAttached
+        await addAttachmentToItem({
+            parentItem: this.document,
+            droppedItem: item,
+            parentType: 'weapon'
         });
-        
-        // Copy ALL effects from attached item to actor (only if weapon is equipped)
-        // Both attachment-only and regular effects should be copied when attached
-        const actor = this.document.parent;
-        if (actor && item.effects.size > 0 && this.document.system.equipped) {
-            await copyAttachmentEffectsToActor({
-                parentItem: this.document,
-                attachedItem: item,
-                attachedUuid: newUUID,
-                parentType: 'weapon'
-            });
-        }
     }
 
     /**
