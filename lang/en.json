@@ -384,6 +384,12 @@
                 "default": "Default Ownership"
             }
         },
+        "Effect": {
+            "AttachmentOnly": {
+                "Label": "Attachment Only",
+                "Hint": "This effect only activates when the item is attached to armor or a weapon."
+            }
+        },
         "CONFIG": {
             "ActionType": {
                 "passive": "Passive",
@@ -1030,11 +1036,7 @@
             },
             "Effect": {
                 "single": "Effect",
-                "plural": "Effects",
-                "AttachmentOnly": {
-                    "Label": "Attachment Only",
-                    "Hint": "When checked, this effect will only apply to the actor when this item is attached to another item (e.g., attached to armor). If unchecked, the effect applies normally based on item equipped status."
-                }
+                "plural": "Effects"
             },
             "Experience": {
                 "single": "Experience",
