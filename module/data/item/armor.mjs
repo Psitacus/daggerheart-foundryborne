@@ -115,6 +115,7 @@ export default class DHArmor extends BaseDataItem {
                 const attachedItem = await fromUuid(attachedUuid);
                 if (attachedItem && attachedItem.effects.size > 0) {
                     for (const effect of attachedItem.effects) {
+                        // Copy ALL effects when item is attached - attachment-only flag only matters for non-attached items
                         const effectData = effect.toObject();
                         effectData.origin = `${this.parent.uuid}:${attachedUuid}`;
                         effectData.flags = {

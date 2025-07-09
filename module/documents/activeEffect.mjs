@@ -1,14 +1,58 @@
 export default class DhActiveEffect extends ActiveEffect {
     get isSuppressed() {
-        if (['weapon', 'armor'].includes(this.parent.type)) {
+        // If this is a copied effect from an attachment, never suppress it
+        // (These effects have attachmentSource metadata)
+        if (this.flags?.daggerheart?.attachmentSource) {
+            return false;
+        }
+
+        // First check for attachment-only effects - these should be suppressed unless attached
+        if (this.isAttachmentOnly && !this.isAttached) {
+            return true;
+        }
+
+        // Then apply the standard suppression rules
+        if (['weapon', 'armor'].includes(this.parent?.type)) {
             return !this.parent.system.equipped;
         }
 
-        if (this.parent.type === 'domainCard') {
+        if (this.parent?.type === 'domainCard') {
             return this.parent.system.inVault;
         }
 
         return super.isSuppressed;
+    }
+
+    /**
+     * Check if this effect is marked as attachment-only
+     * @returns {boolean}
+     */
+    get isAttachmentOnly() {
+        return this.flags?.daggerheart?.attachmentOnly === true;
+    }
+
+    /**
+     * Check if the parent item is currently attached to another item
+     * @returns {boolean}
+     */
+    get isAttached() {
+        if (!this.parent || !this.parent.parent) return false;
+        
+        // Check if this item's UUID is in any actor's armor attachment lists
+        const actor = this.parent.parent;
+        if (!actor || !actor.items) return false;
+        
+        try {
+            return actor.items.some(item => {
+                return item.type === 'armor' && 
+                       item.system?.attached && 
+                       Array.isArray(item.system.attached) &&
+                       item.system.attached.includes(this.parent.uuid);
+            });
+        } catch (error) {
+            console.warn('Error checking if item is attached:', error);
+            return false;
+        }
     }
 
     async _preCreate(data, options, user) {
@@ -50,15 +94,5 @@ export default class DhActiveEffect extends ActiveEffect {
         });
 
         cls.create(msg.toObject());
-    }
-
-    /**
-     * Retrieve the Document that this ActiveEffect targets for modification.
-     * @type {Document|null}
-     */
-    get target() {
-        if (this.parent instanceof Actor) return this.parent;
-        if (CONFIG.ActiveEffect.legacyTransferral) return this.transfer ? null : this.parent;
-        return this.transfer ? (this.parent.parent ?? null) : this.parent;
     }
 }

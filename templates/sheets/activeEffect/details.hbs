@@ -8,6 +8,13 @@
     {{/if}}
     {{#if isItemEffect}}
     {{formGroup fields.transfer value=source.transfer rootId=rootId label=legacyTransfer.label hint=legacyTransfer.hint}}
+    
+    {{!-- Attachment-only flag for item effects --}}
+    <div class="form-group">
+        <label for="{{rootId}}-attachmentOnly">{{localize "DAGGERHEART.Effect.AttachmentOnly.Label"}}</label>
+        <input type="checkbox" id="{{rootId}}-attachmentOnly" name="flags.daggerheart.attachmentOnly" {{#if source.flags.daggerheart.attachmentOnly}}checked{{/if}}>
+        <p class="hint">{{localize "DAGGERHEART.Effect.AttachmentOnly.Hint"}}</p>
+    </div>
     {{/if}}
 
     {{formGroup fields.statuses value=source.statuses options=statuses rootId=rootId classes="statuses"}}

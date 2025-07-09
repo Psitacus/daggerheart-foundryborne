@@ -1026,7 +1026,11 @@
             },
             "Effect": {
                 "single": "Effect",
-                "plural": "Effects"
+                "plural": "Effects",
+                "AttachmentOnly": {
+                    "Label": "Attachment Only",
+                    "Hint": "When checked, this effect will only apply to the actor when this item is attached to another item (e.g., attached to armor). If unchecked, the effect applies normally based on item equipped status."
+                }
             },
             "Experience": {
                 "single": "Experience",

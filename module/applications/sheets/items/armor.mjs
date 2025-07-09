@@ -132,14 +132,15 @@ export default class ArmorSheet extends DHBaseItemSheet {
             'system.attached': updatedAttached
         });
         
-        // Copy effects from attached item to actor (only if armor is equipped)
+        // Copy ALL effects from attached item to actor (only if armor is equipped)
+        // Both attachment-only and regular effects should be copied when attached
         const actor = this.document.parent;
         if (actor && item.effects.size > 0 && this.document.system.equipped) {
-            console.log(`Copying ${item.effects.size} effects from attached item ${item.name} to actor ${actor.name} (armor is equipped)`);
+            console.log(`Checking ${item.effects.size} effects from attached item ${item.name}`);
             
             const effectsToCreate = [];
             for (const effect of item.effects) {
-                // Create a copy of the effect with metadata to track its source
+                // Copy ALL effects when item is attached - attachment-only flag only matters for non-attached items
                 const effectData = effect.toObject();
                 effectData.origin = `${this.document.uuid}:${newUUID}`; // Track which armor and which item this came from
                 effectData.flags = {
@@ -154,10 +155,17 @@ export default class ArmorSheet extends DHBaseItemSheet {
                     }
                 };
                 effectsToCreate.push(effectData);
+                
+                const isAttachmentOnly = effect.flags?.daggerheart?.attachmentOnly === true;
+                console.log(`Effect ${effect.name} (attachment-only: ${isAttachmentOnly}) will be copied to actor`);
             }
             
-            const createdEffects = await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
-            console.log(`Created ${createdEffects.length} effects on actor from attached item`);
+            if (effectsToCreate.length > 0) {
+                const createdEffects = await actor.createEmbeddedDocuments('ActiveEffect', effectsToCreate);
+                console.log(`Created ${createdEffects.length} effects on actor from attached item`);
+            } else {
+                console.log(`No effects found on ${item.name}, no effects copied to actor`);
+            }
         } else if (item.effects.size > 0 && !this.document.system.equipped) {
             console.log(`Armor ${this.document.name} is not equipped, attachment effects will be applied when equipped`);
         }
