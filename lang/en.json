@@ -950,6 +950,9 @@
                 "stress": {
                     "name": "Stress"
                 }
+            },
+            "Attachments": {
+                "attachHint": "Drop items here to attach them"
             }
         },
         "GENERAL": {

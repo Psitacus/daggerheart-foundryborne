@@ -15,16 +15,15 @@
                             <div class="item-name">{{item.name}}</div>
                         </div>
                         <div class="controls">
-                            <i class="fa-solid fa-trash remove-attachment" data-action="removeAttachment" data-uuid="{{item.uuid}}"></i>
+                            <a data-action="removeAttachment" data-uuid="{{item.uuid}}"><i class="fa-solid fa-trash remove-attachment"></i></a>
                         </div>
                     </div>
                 {{/each}}
             </div>
         {{/if}}
         
-        <div class="drop-area" data-drop-type="Item">
-            <i class="fa-solid fa-plus"></i>
-            <span>Drop items here to attach them</span>
+        <div class="drop-area" data-drop-type="Item" style="width: 100%;">
+            <span>{{localize "DAGGERHEART.EFFECTS.Attachments.attachHint"}}</span>
         </div>
     </fieldset>
 </section>
