@@ -1,9 +1,14 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
+import ItemAttachmentSheetMixin from '../api/item-attachment-sheet.mjs';
 
-export default class WeaponSheet extends DHBaseItemSheet {
+export default class WeaponSheet extends ItemAttachmentSheetMixin(DHBaseItemSheet) {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
+        ...super.DEFAULT_OPTIONS,
         classes: ['weapon'],
+        actions: {
+            ...super.DEFAULT_OPTIONS?.actions,
+        },
         tagifyConfigs: [
             {
                 selector: '.features-input',
@@ -15,6 +20,7 @@ export default class WeaponSheet extends DHBaseItemSheet {
 
     /**@override */
     static PARTS = {
+        ...super.PARTS,
         header: { template: 'systems/daggerheart/templates/sheets/items/weapon/header.hbs' },
         tabs: { template: 'systems/daggerheart/templates/sheets/global/tabs/tab-navigation.hbs' },
         description: { template: 'systems/daggerheart/templates/sheets/global/tabs/tab-description.hbs' },
@@ -28,16 +34,26 @@ export default class WeaponSheet extends DHBaseItemSheet {
         }
     };
 
+    /** @override */
+    static TABS = {
+        primary: {
+            tabs: [{ id: 'description' }, { id: 'actions' }, { id: 'settings' }, { id: 'attachments' }],
+            initial: 'description',
+            labelPrefix: 'DAGGERHEART.GENERAL.Tabs'
+        }
+    };
+
     /**@inheritdoc */
     async _preparePartContext(partId, context) {
-        super._preparePartContext(partId, context);
+        const partContext = await super._preparePartContext(partId, context);
+
         switch (partId) {
             case 'settings':
-                context.features = this.document.system.features.map(x => x.value);
-                context.systemFields.attack.fields = this.document.system.attack.schema.fields;
+                partContext.features = this.document.system.features.map(x => x.value);
+                partContext.systemFields.attack.fields = this.document.system.attack.schema.fields;
                 break;
         }
-        return context;
+        return partContext;
     }
 
     /**

@@ -29,7 +29,12 @@ export default class CharacterSheet extends DHBaseActorSheet {
         window: {
             resizable: true
         },
-        dragDrop: [],
+        dragDrop: [
+            {
+                dragSelector: '[data-item-id][draggable="true"]',
+                dropSelector: null
+            }
+        ],
         contextMenus: [
             {
                 handler: CharacterSheet._getContextMenuOptions,
@@ -202,7 +207,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
 
         return [
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.UseItem',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.useItem',
                 icon: '<i class="fa-solid fa-burst"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -211,7 +216,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: (button, event) => CharacterSheet.useItem.call(this, event, button)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Equip',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.equip',
                 icon: '<i class="fa-solid fa-hands"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -220,7 +225,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: CharacterSheet.#toggleEquipItem.bind(this)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Unequip',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.unequip',
                 icon: '<i class="fa-solid fa-hands"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -229,7 +234,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: CharacterSheet.#toggleEquipItem.bind(this)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.ToLoadout',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.toLoadout',
                 icon: '<i class="fa-solid fa-arrow-up"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -238,7 +243,7 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: target => getItem(target).update({ 'system.inVault': false })
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.ToVault',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.toVault',
                 icon: '<i class="fa-solid fa-arrow-down"></i>',
                 condition: el => {
                     const item = getItem(el);
@@ -247,17 +252,17 @@ export default class CharacterSheet extends DHBaseActorSheet {
                 callback: target => getItem(target).update({ 'system.inVault': true })
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.SendToChat',
+                name: 'DAGGERHEART.ACTORS.Character.contextMenu.sendToChat',
                 icon: '<i class="fa-regular fa-message"></i>',
                 callback: CharacterSheet.toChat.bind(this)
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Edit',
+                name: 'CONTROLS.CommonEdit',
                 icon: '<i class="fa-solid fa-pen-to-square"></i>',
                 callback: target => getItem(target).sheet.render({ force: true })
             },
             {
-                name: 'DAGGERHEART.Sheets.PC.ContextMenu.Delete',
+                name: 'CONTROLS.CommonDelete',
                 icon: '<i class="fa-solid fa-trash"></i>',
                 callback: async el => {
                     const item = getItem(el);
@@ -650,11 +655,24 @@ export default class CharacterSheet extends DHBaseActorSheet {
         }
     }
 
-    async _onDragStart(_, event) {
+    async _onDragStart(event) {
+        const item = this.getItem(event);
+        
+        const dragData = {
+            type: item.documentName,
+            uuid: item.uuid
+        };
+        
+        event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+        
         super._onDragStart(event);
     }
 
     async _onDrop(event) {
+        // Prevent event bubbling to avoid duplicate handling
+        event.preventDefault();
+        event.stopPropagation();
+        
         super._onDrop(event);
         this._onDropItem(event, TextEditor.getDragEventData(event));
     }

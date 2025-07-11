@@ -20,6 +20,9 @@
             "environment": "Environment"
         }
     },
+    "CONTROLS": {
+        "inFront": "In Front"
+    },
     "DAGGERHEART": {
         "ACTIONS": {
             "Config": {
@@ -107,7 +110,8 @@
                     "sendToChat": "Send To Chat",
                     "toLoadout": "Send to Loadout",
                     "toVault": "Send to Vault",
-                    "unequip": "Unequip"
+                    "unequip": "Unequip",
+                    "useItem": "Use Item"
                 },
                 "faith": "Faith",
                 "levelUp": "You can level up",
@@ -380,6 +384,7 @@
                 "default": "Default Ownership"
             }
         },
+        
         "CONFIG": {
             "ActionType": {
                 "passive": "Passive",
@@ -945,6 +950,10 @@
                 "stress": {
                     "name": "Stress"
                 }
+            },
+            "Attachments": {
+                "attachHint": "Drop items here to attach them",
+                "transferHint": "If checked, this effect will be applied to any actor that owns this Effect's parent Item. The effect is always applied if this Item is attached to another one."
             }
         },
         "GENERAL": {
@@ -1070,7 +1079,8 @@
                 "mastery": "Mastery",
                 "optional": "Optional",
                 "setup": "Setup",
-                "equipment": "Equipment"
+                "equipment": "Equipment",
+                "attachments": "Attachments"
             },
             "Tiers": {
                 "singular": "Tier",
