@@ -1,15 +1,13 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
-import { copyAttachmentEffectsToActor, removeAttachmentFromItem, prepareAttachmentContext, addAttachmentToItem } from '../../../helpers/attachmentHelper.mjs';
+import ItemAttachmentSheetMixin from '../api/item-attachment-sheet.mjs';
 
-export default class ArmorSheet extends DHBaseItemSheet {
+export default class ArmorSheet extends ItemAttachmentSheetMixin(DHBaseItemSheet) {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
+        ...super.DEFAULT_OPTIONS,
         classes: ['armor'],
-        dragDrop: [
-            { dragSelector: null, dropSelector: '.attachments-section' }
-        ],
         actions: {
-            removeAttachment: ArmorSheet.#removeAttachment
+            ...super.DEFAULT_OPTIONS?.actions,
         },
         tagifyConfigs: [
             {
@@ -22,6 +20,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
 
     /**@override */
     static PARTS = {
+        ...super.PARTS,
         header: { template: 'systems/daggerheart/templates/sheets/items/armor/header.hbs' },
         tabs: { template: 'systems/daggerheart/templates/sheets/global/tabs/tab-navigation.hbs' },
         description: { template: 'systems/daggerheart/templates/sheets/global/tabs/tab-description.hbs' },
@@ -32,10 +31,6 @@ export default class ArmorSheet extends DHBaseItemSheet {
         settings: {
             template: 'systems/daggerheart/templates/sheets/items/armor/settings.hbs',
             scrollable: ['.settings']
-        },
-        attachments: {
-            template: 'systems/daggerheart/templates/sheets/global/tabs/tab-attachments.hbs',
-            scrollable: ['.attachments']
         }
     };
 
@@ -50,18 +45,15 @@ export default class ArmorSheet extends DHBaseItemSheet {
 
     /**@inheritdoc */
     async _preparePartContext(partId, context) {
-        await super._preparePartContext(partId, context);
+        const partContext = await super._preparePartContext(partId, context);
 
         switch (partId) {
             case 'settings':
-                context.features = this.document.system.features.map(x => x.value);
-                break;
-            case 'attachments':
-                context.attachedItems = await prepareAttachmentContext(this.document);
+                partContext.features = this.document.system.features.map(x => x.value);
                 break;
         }
 
-        return context;
+        return partContext;
     }
 
     /**
@@ -70,49 +62,5 @@ export default class ArmorSheet extends DHBaseItemSheet {
      */
     static async #onFeatureSelect(selectedOptions) {
         await this.document.update({ 'system.features': selectedOptions.map(x => ({ value: x.value })) });
-    }
-
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
-    /**
-     * Handle dropping items onto the attachments section
-     * @param {DragEvent} event - The drop event
-     */
-    async _onDrop(event) {
-        const data = TextEditor.getDragEventData(event);
-        
-        const attachmentsSection = event.target.closest('.attachments-section');
-        if (!attachmentsSection) return super._onDrop(event);
-        
-        event.preventDefault();
-        event.stopPropagation();
-        
-        const item = await Item.implementation.fromDropData(data);
-        if (!item) return;
-        
-        await addAttachmentToItem({
-            parentItem: this.document,
-            droppedItem: item,
-            parentType: 'armor'
-        });
-    }
-
-    /* -------------------------------------------- */
-    /*  Application Clicks Actions                  */
-    /* -------------------------------------------- */
-
-    /**
-     * Remove an attached item
-     * @param {Event} event - The click event
-     * @param {HTMLElement} target - The clicked element
-     */
-    static async #removeAttachment(event, target) {
-        await removeAttachmentFromItem({
-            parentItem: this.document,
-            attachedUuid: target.dataset.uuid,
-            parentType: 'armor'
-        });
     }
 }

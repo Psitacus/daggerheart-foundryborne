@@ -1,9 +1,8 @@
-import BaseDataItem from './base.mjs';
+import AttachableItem from './attachableItem.mjs';
 import { actionsTypes } from '../action/_module.mjs';
 import ActionField from '../fields/actionField.mjs';
-import { handleAttachmentEffectsOnEquipChange } from '../../helpers/attachmentHelper.mjs';
 
-export default class DHWeapon extends BaseDataItem {
+export default class DHWeapon extends AttachableItem {
     /** @inheritDoc */
     static get metadata() {
         return foundry.utils.mergeObject(super.metadata, {
@@ -22,7 +21,6 @@ export default class DHWeapon extends BaseDataItem {
         return {
             ...super.defineSchema(),
             tier: new fields.NumberField({ required: true, integer: true, initial: 1, min: 1 }),
-            equipped: new fields.BooleanField({ initial: false }),
 
             //SETTINGS
             secondary: new fields.BooleanField({ initial: false }),
@@ -67,7 +65,6 @@ export default class DHWeapon extends BaseDataItem {
                     }
                 }
             }),
-            attached: new fields.ArrayField(new fields.DocumentUUIDField({ type: "Item", nullable: true })),
             actions: new fields.ArrayField(new ActionField())
         };
     }
@@ -79,15 +76,6 @@ export default class DHWeapon extends BaseDataItem {
     async _preUpdate(changes, options, user) {
         const allowed = await super._preUpdate(changes, options, user);
         if (allowed === false) return false;
-
-        // Handle equipped status changes for attachment effects
-        if (changes.system?.equipped !== undefined && changes.system.equipped !== this.equipped) {
-            await handleAttachmentEffectsOnEquipChange({
-                parentItem: this.parent,
-                newEquippedStatus: changes.system.equipped,
-                parentType: 'weapon'
-            });
-        }
 
         if (changes.system?.features) {
             const removed = this.features.filter(x => !changes.system.features.includes(x));
