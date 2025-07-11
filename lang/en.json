@@ -384,12 +384,7 @@
                 "default": "Default Ownership"
             }
         },
-        "Effect": {
-            "AttachmentOnly": {
-                "Label": "Attachment Only",
-                "Hint": "This effect only activates when the item is attached to armor or a weapon."
-            }
-        },
+        
         "CONFIG": {
             "ActionType": {
                 "passive": "Passive",
