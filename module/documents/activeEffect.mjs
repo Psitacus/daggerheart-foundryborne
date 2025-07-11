@@ -6,12 +6,6 @@ export default class DhActiveEffect extends ActiveEffect {
             return false;
         }
 
-        // First check for attachment-only effects - these should ALWAYS be suppressed on the original item
-        // They only work through copied versions when attached
-        if (this.isAttachmentOnly) {
-            return true;
-        }
-
         // Then apply the standard suppression rules
         if (['weapon', 'armor'].includes(this.parent?.type)) {
             return !this.parent.system.equipped;
@@ -22,14 +16,6 @@ export default class DhActiveEffect extends ActiveEffect {
         }
 
         return super.isSuppressed;
-    }
-
-    /**
-     * Check if this effect is marked as attachment-only
-     * @returns {boolean}
-     */
-    get isAttachmentOnly() {
-        return this.flags?.daggerheart?.attachmentOnly === true;
     }
 
     /**
