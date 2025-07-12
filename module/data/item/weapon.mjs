@@ -1,7 +1,6 @@
 import AttachableItem from './attachableItem.mjs';
 import { actionsTypes } from '../action/_module.mjs';
 import ActionField from '../fields/actionField.mjs';
-import { handleAttachmentEffectsOnEquipChange } from '../../helpers/attachmentHelper.mjs';
 
 export default class DHWeapon extends AttachableItem {
     /** @inheritDoc */
@@ -39,7 +38,7 @@ export default class DHWeapon extends AttachableItem {
                     actionIds: new fields.ArrayField(new fields.StringField({ required: true }))
                 })
             ),
-            attack: new ActionField({
+                        attack: new ActionField({
                 initial: {
                     name: 'Attack',
                     img: 'icons/skills/melee/blood-slash-foam-red.webp',

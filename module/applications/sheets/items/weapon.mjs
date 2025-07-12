@@ -1,6 +1,5 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
 import ItemAttachmentSheet from '../api/item-attachment-sheet.mjs';
-import { copyAttachmentEffectsToActor, removeAttachmentFromItem, prepareAttachmentContext, addAttachmentToItem } from '../../../helpers/attachmentHelper.mjs';
 
 export default class WeaponSheet extends ItemAttachmentSheet(DHBaseItemSheet) {
     /**@inheritdoc */
