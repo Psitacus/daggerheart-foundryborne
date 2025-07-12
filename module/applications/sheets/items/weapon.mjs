@@ -30,15 +30,6 @@ export default class WeaponSheet extends ItemAttachmentSheet(DHBaseItemSheet) {
         ...super.PARTS,
     };
 
-    /** @override */
-    static TABS = {
-        primary: {
-            tabs: [{ id: 'description' }, { id: 'actions' }, { id: 'settings' }, { id: 'attachments' }],
-            initial: 'description',
-            labelPrefix: 'DAGGERHEART.GENERAL.Tabs'
-        }
-    };
-
     /**@inheritdoc */
     async _preparePartContext(partId, context) {
         await super._preparePartContext(partId, context);

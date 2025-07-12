@@ -21,6 +21,19 @@ export default function ItemAttachmentSheet(Base) {
             }
         };
 
+        static TABS = {
+            ...super.TABS,
+            primary: {
+                ...super.TABS?.primary,
+                tabs: [
+                    ...(super.TABS?.primary?.tabs || []),
+                    { id: 'attachments' }
+                ],
+                initial: super.TABS?.primary?.initial || 'description',
+                labelPrefix: super.TABS?.primary?.labelPrefix || 'DAGGERHEART.GENERAL.Tabs'
+            }
+        };
+
         async _preparePartContext(partId, context) {
             await super._preparePartContext(partId, context);
 
