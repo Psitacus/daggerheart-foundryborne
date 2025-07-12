@@ -30,13 +30,6 @@ export default class DhActiveEffectConfig extends foundry.applications.sheets.Ac
     async _preparePartContext(partId, context) {
         const partContext = await super._preparePartContext(partId, context);
         switch (partId) {
-            case 'details':
-                // Add your custom checkbox field here
-                partContext.fields.yourCustomField = new foundry.data.fields.BooleanField({
-                    label: "DAGGERHEART.EFFECTS.YourCustomField.label",
-                    hint: "DAGGERHEART.EFFECTS.YourCustomField.hint"
-                });
-                break;
             case 'changes':
                 const fieldPaths = [];
                 const validFieldPath = fieldPath => this.validFieldPath(fieldPath, this.#unapplicablePaths);

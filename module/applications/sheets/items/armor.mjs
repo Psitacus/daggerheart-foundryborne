@@ -13,7 +13,7 @@ export default class ArmorSheet extends ItemAttachmentSheet(DHBaseItemSheet) {
             }
         ]
     };
-
+    
     /**@override */
     static PARTS = {
         header: { template: 'systems/daggerheart/templates/sheets/items/armor/header.hbs' },
