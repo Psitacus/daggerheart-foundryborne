@@ -1,16 +1,10 @@
 import DHBaseItemSheet from '../api/base-item.mjs';
-import { copyAttachmentEffectsToActor, removeAttachmentFromItem, prepareAttachmentContext, addAttachmentToItem } from '../../../helpers/attachmentHelper.mjs';
+import ItemAttachmentSheet from '../api/item-attachment-sheet.mjs';
 
-export default class ArmorSheet extends DHBaseItemSheet {
+export default class ArmorSheet extends ItemAttachmentSheet(DHBaseItemSheet) {
     /**@inheritdoc */
     static DEFAULT_OPTIONS = {
         classes: ['armor'],
-        dragDrop: [
-            { dragSelector: null, dropSelector: '.attachments-section' }
-        ],
-        actions: {
-            removeAttachment: ArmorSheet.#removeAttachment
-        },
         tagifyConfigs: [
             {
                 selector: '.features-input',
@@ -33,10 +27,7 @@ export default class ArmorSheet extends DHBaseItemSheet {
             template: 'systems/daggerheart/templates/sheets/items/armor/settings.hbs',
             scrollable: ['.settings']
         },
-        attachments: {
-            template: 'systems/daggerheart/templates/sheets/global/tabs/tab-attachments.hbs',
-            scrollable: ['.attachments']
-        }
+        ...super.PARTS,
     };
 
     /** @override */
@@ -56,9 +47,6 @@ export default class ArmorSheet extends DHBaseItemSheet {
             case 'settings':
                 context.features = this.document.system.features.map(x => x.value);
                 break;
-            case 'attachments':
-                context.attachedItems = await prepareAttachmentContext(this.document);
-                break;
         }
 
         return context;
@@ -70,49 +58,5 @@ export default class ArmorSheet extends DHBaseItemSheet {
      */
     static async #onFeatureSelect(selectedOptions) {
         await this.document.update({ 'system.features': selectedOptions.map(x => ({ value: x.value })) });
-    }
-
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
-    /**
-     * Handle dropping items onto the attachments section
-     * @param {DragEvent} event - The drop event
-     */
-    async _onDrop(event) {
-        const data = TextEditor.getDragEventData(event);
-        
-        const attachmentsSection = event.target.closest('.attachments-section');
-        if (!attachmentsSection) return super._onDrop(event);
-        
-        event.preventDefault();
-        event.stopPropagation();
-        
-        const item = await Item.implementation.fromDropData(data);
-        if (!item) return;
-        
-        await addAttachmentToItem({
-            parentItem: this.document,
-            droppedItem: item,
-            parentType: 'armor'
-        });
-    }
-
-    /* -------------------------------------------- */
-    /*  Application Clicks Actions                  */
-    /* -------------------------------------------- */
-
-    /**
-     * Remove an attached item
-     * @param {Event} event - The click event
-     * @param {HTMLElement} target - The clicked element
-     */
-    static async #removeAttachment(event, target) {
-        await removeAttachmentFromItem({
-            parentItem: this.document,
-            attachedUuid: target.dataset.uuid,
-            parentType: 'armor'
-        });
     }
 }
