@@ -2,7 +2,6 @@ import AttachableItem from './attachableItem.mjs';
 import ActionField from '../fields/actionField.mjs';
 import { armorFeatures } from '../../config/itemConfig.mjs';
 import { actionsTypes } from '../action/_module.mjs';
-import { handleAttachmentEffectsOnEquipChange } from '../../helpers/attachmentHelper.mjs';
 
 export default class DHArmor extends AttachableItem {
     /** @inheritDoc */
