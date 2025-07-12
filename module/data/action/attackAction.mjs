@@ -14,12 +14,12 @@ export default class DHAttackAction extends DHDamageAction {
 
     prepareData() {
         super.prepareData();
-        if(!!this.item?.system?.attack) {
+        if (!!this.item?.system?.attack) {
             if (this.damage.includeBase) {
                 const baseDamage = this.getParentDamage();
                 this.damage.parts.unshift(new DHDamageData(baseDamage));
             }
-            if(this.roll.useDefault) {
+            if (this.roll.useDefault) {
                 this.roll.trait = this.item.system.attack.roll.trait;
                 this.roll.type = 'weapon';
             }

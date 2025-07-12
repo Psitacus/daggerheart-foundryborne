@@ -23,7 +23,7 @@ export default class DHArmor extends AttachableItem {
             tier: new fields.NumberField({ required: true, integer: true, initial: 1, min: 1 }),
             equipped: new fields.BooleanField({ initial: false }),
             baseScore: new fields.NumberField({ integer: true, initial: 0 }),
-            features: new fields.ArrayField(
+            armorFeatures: new fields.ArrayField(
                 new fields.SchemaField({
                     value: new fields.StringField({
                         required: true,
@@ -45,25 +45,28 @@ export default class DHArmor extends AttachableItem {
         };
     }
 
-    get featureInfo() {
-        return this.feature ? CONFIG.DH.ITEM.armorFeatures[this.feature] : null;
+    get customActions() {
+        return this.actions.filter(
+            action => !this.armorFeatures.some(feature => feature.actionIds.includes(action.id))
+        );
     }
 
     async _preUpdate(changes, options, user) {
         const allowed = await super._preUpdate(changes, options, user);
         if (allowed === false) return false;
 
-        if (changes.system.features) {
-            const removed = this.features.filter(x => !changes.system.features.includes(x));
-            const added = changes.system.features.filter(x => !this.features.includes(x));
+        if (changes.system.armorFeatures) {
+            const removed = this.armorFeatures.filter(x => !changes.system.armorFeatures.includes(x));
+            const added = changes.system.armorFeatures.filter(x => !this.armorFeatures.includes(x));
 
+            const effectIds = [];
+            const actionIds = [];
             for (var feature of removed) {
-                for (var effectId of feature.effectIds) {
-                    await this.parent.effects.get(effectId).delete();
-                }
-
-                changes.system.actions = this.actions.filter(x => !feature.actionIds.includes(x._id));
+                effectIds.push(...feature.effectIds);
+                actionIds.push(...feature.actionIds);
             }
+            await this.parent.deleteEmbeddedDocuments('ActiveEffect', effectIds);
+            changes.system.actions = this.actions.filter(x => !actionIds.includes(x._id));
 
             for (var feature of added) {
                 const featureData = armorFeatures[feature.value];

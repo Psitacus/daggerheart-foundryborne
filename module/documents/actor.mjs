@@ -3,6 +3,7 @@ import { emitAsGM, emitAsOwner, GMUpdateEvent, socketEvent } from '../systemRegi
 import DamageReductionDialog from '../applications/dialogs/damageReductionDialog.mjs';
 import { LevelOptionType } from '../data/levelTier.mjs';
 import DHFeature from '../data/item/feature.mjs';
+import { damageKeyToNumber, getDamageKey } from '../helpers/utils.mjs';
 
 export default class DhpActor extends Actor {
     /**
@@ -455,14 +456,32 @@ export default class DhpActor extends Actor {
         cls.create(msg.toObject());
     }
 
-    async takeDamage(damage, type) {
-        if (Hooks.call(`${CONFIG.DH.id}.preTakeDamage`, this, damage, type) === false) return null;
+    #canReduceDamage(hpDamage, type) {
+        const availableStress = this.system.resources.stress.maxTotal - this.system.resources.stress.value;
+
+        const canUseArmor =
+            this.system.armor &&
+            this.system.armor.system.marks.value < this.system.armorScore &&
+            this.system.armorApplicableDamageTypes[type];
+        const canUseStress = Object.keys(this.system.rules.damageReduction.stressDamageReduction).reduce((acc, x) => {
+            const rule = this.system.rules.damageReduction.stressDamageReduction[x];
+            if (damageKeyToNumber(x) <= hpDamage) return acc || (rule.enabled && availableStress >= rule.cost);
+            return acc;
+        }, false);
+
+        return canUseArmor || canUseStress;
+    }
+
+    async takeDamage(baseDamage, type) {
+        if (Hooks.call(`${CONFIG.DH.id}.preTakeDamage`, this, baseDamage, type) === false) return null;
 
         if (this.type === 'companion') {
             await this.modifyResource([{ value: 1, type: 'stress' }]);
             return;
         }
 
+        const flatReduction = this.system.bonuses.damageReduction[type];
+        const damage = Math.max(baseDamage - (flatReduction ?? 0), 0);
         const hpDamage = this.convertDamageToThreshold(damage);
 
         if (Hooks.call(`${CONFIG.DH.id}.postDamageTreshold`, this, hpDamage, damage, type) === false) return null;
@@ -471,12 +490,12 @@ export default class DhpActor extends Actor {
 
         const updates = [{ value: hpDamage, type: 'hitPoints' }];
 
-        if (
-            this.type === 'character' &&
-            this.system.armor &&
-            this.system.armor.system.marks.value < this.system.armorScore
-        ) {
-            const armorStackResult = await this.owner.query('armorStack', { actorId: this.uuid, damage: hpDamage });
+        if (this.type === 'character' && this.system.armor && this.#canReduceDamage(hpDamage, type)) {
+            const armorStackResult = await this.owner.query('armorStack', {
+                actorId: this.uuid,
+                damage: hpDamage,
+                type: type
+            });
             if (armorStackResult) {
                 const { modifiedDamage, armorSpent, stressSpent } = armorStackResult;
                 updates.find(u => u.type === 'hitPoints').value = modifiedDamage;

@@ -90,10 +90,12 @@ export default class DHItem extends foundry.documents.Item {
             ok: {
                 label: title,
                 callback: (event, button, dialog) => {
-                    Object.defineProperty(prevEvent, "shiftKey", {
-                        get() { return event.shiftKey; },
+                    Object.defineProperty(prevEvent, 'shiftKey', {
+                        get() {
+                            return event.shiftKey;
+                        }
                     });
-                    return this.system.actionsList.find(a => a._id === button.form.elements.actionId.value)
+                    return this.system.actionsList.find(a => a._id === button.form.elements.actionId.value);
                 }
             }
         });
