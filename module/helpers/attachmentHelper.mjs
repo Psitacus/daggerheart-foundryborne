@@ -32,9 +32,9 @@ export async function copyAttachmentEffectsToActor({ parentItem, attachedItem, a
         
         effectData.flags = {
             ...effectData.flags,
-            daggerheart: {
-                ...effectData.flags?.daggerheart,
-                attachmentSource
+            [CONFIG.DH.id]: {
+                ...effectData.flags?.[CONFIG.DH.id],
+                [CONFIG.DH.FLAGS.itemAttachmentSource]: attachmentSource
             }
         };
         effectsToCreate.push(effectData);
@@ -61,7 +61,7 @@ export async function removeAttachmentEffectsFromActor({ parentItem, attachedUui
 
     const parentUuidProperty = `${parentType}Uuid`;
     const effectsToRemove = actor.effects.filter(effect => {
-        const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
+        const attachmentSource = effect.getFlag(CONFIG.DH.id, CONFIG.DH.FLAGS.itemAttachmentSource);
         return attachmentSource && 
                attachmentSource[parentUuidProperty] === parentItem.uuid && 
                attachmentSource.itemUuid === attachedUuid;
