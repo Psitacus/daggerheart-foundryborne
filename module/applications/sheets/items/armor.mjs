@@ -13,7 +13,7 @@ export default class ArmorSheet extends ItemAttachmentSheet(DHBaseItemSheet) {
             }
         ]
     };
-    
+
     /**@override */
     static PARTS = {
         header: { template: 'systems/daggerheart/templates/sheets/items/armor/header.hbs' },
@@ -28,15 +28,6 @@ export default class ArmorSheet extends ItemAttachmentSheet(DHBaseItemSheet) {
             scrollable: ['.settings']
         },
         ...super.PARTS,
-    };
-
-    /** @override */
-    static TABS = {
-        primary: {
-            tabs: [{ id: 'description' }, { id: 'actions' }, { id: 'settings' }, { id: 'attachments' }],
-            initial: 'description',
-            labelPrefix: 'DAGGERHEART.GENERAL.Tabs'
-        }
     };
 
     /**@inheritdoc */
