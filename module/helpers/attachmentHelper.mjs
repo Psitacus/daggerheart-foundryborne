@@ -129,7 +129,7 @@ export async function handleAttachmentEffectsOnEquipChange({ parentItem, newEqui
         // Item is being unequipped - remove attachment effects
         const parentUuidProperty = `${parentType}Uuid`;
         const effectsToRemove = actor.effects.filter(effect => {
-            const attachmentSource = effect.flags?.daggerheart?.attachmentSource;
+            const attachmentSource = effect.getFlag(CONFIG.DH.id, CONFIG.DH.FLAGS.itemAttachmentSource);
             return attachmentSource && attachmentSource[parentUuidProperty] === parentItem.uuid;
         });
 

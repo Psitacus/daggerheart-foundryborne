@@ -54,15 +54,6 @@ export default class DHArmor extends AttachableItem {
         const allowed = await super._preUpdate(changes, options, user);
         if (allowed === false) return false;
 
-        // Handle equipped status changes for attachment effects
-        if (changes.system?.equipped !== undefined && changes.system.equipped !== this.equipped) {
-            await handleAttachmentEffectsOnEquipChange({
-                parentItem: this.parent,
-                newEquippedStatus: changes.system.equipped,
-                parentType: 'armor'
-            });
-        }
-
         if (changes.system.features) {
             const removed = this.features.filter(x => !changes.system.features.includes(x));
             const added = changes.system.features.filter(x => !this.features.includes(x));
