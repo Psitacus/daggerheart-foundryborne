@@ -20,6 +20,7 @@ export default class DhCompanion extends BaseDataActor {
         const fields = foundry.data.fields;
 
         return {
+            ...super.defineSchema(),
             partner: new ForeignDocumentUUIDField({ type: 'Actor' }),
             resources: new fields.SchemaField({
                 stress: new fields.SchemaField({
@@ -66,10 +67,10 @@ export default class DhCompanion extends BaseDataActor {
                     damage: {
                         parts: [
                             {
-                                multiplier: 'flat',
+                                type: ['physical'],
                                 value: {
                                     dice: 'd6',
-                                    multiplier: 'flat'
+                                    multiplier: 'prof'
                                 }
                             }
                         ]
@@ -84,6 +85,12 @@ export default class DhCompanion extends BaseDataActor {
     get traits() {
         return {
             instinct: { total: this.attack.roll.bonus }
+        };
+    }
+
+    get proficiency() {
+        return {
+            total: this.partner?.system?.proficiency?.total ?? 1
         };
     }
 

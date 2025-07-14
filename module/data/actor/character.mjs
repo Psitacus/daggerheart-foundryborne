@@ -36,6 +36,7 @@ export default class DhCharacter extends BaseDataActor {
         const fields = foundry.data.fields;
 
         return {
+            ...super.defineSchema(),
             resources: new fields.SchemaField({
                 hitPoints: new fields.SchemaField({
                     value: new foundry.data.fields.NumberField({ initial: 0, integer: true }),
@@ -106,6 +107,9 @@ export default class DhCharacter extends BaseDataActor {
                 }),
                 roll: new fields.SchemaField({
                     attack: new fields.NumberField({ integer: true, initial: 0 }),
+                    primaryWeapon: new fields.SchemaField({
+                        attack: new fields.NumberField({ integer: true, initial: 0 })
+                    }),
                     spellcast: new fields.NumberField({ integer: true, initial: 0 }),
                     action: new fields.NumberField({ integer: true, initial: 0 }),
                     hopeOrFear: new fields.NumberField({ integer: true, initial: 0 })
@@ -113,20 +117,29 @@ export default class DhCharacter extends BaseDataActor {
                 damage: new fields.SchemaField({
                     all: new fields.NumberField({ integer: true, initial: 0 }),
                     physical: new fields.NumberField({ integer: true, initial: 0 }),
-                    magic: new fields.NumberField({ integer: true, initial: 0 })
+                    magic: new fields.NumberField({ integer: true, initial: 0 }),
+                    primaryWeapon: new fields.SchemaField({
+                        bonus: new fields.NumberField({ integer: true }),
+                        extraDice: new fields.NumberField({ integer: true })
+                    })
                 })
             }),
             companion: new ForeignDocumentUUIDField({ type: 'Actor', nullable: true, initial: null }),
             rules: new fields.SchemaField({
-                maxArmorMarked: new fields.SchemaField({
-                    value: new fields.NumberField({ required: true, integer: true, initial: 1 }),
-                    bonus: new fields.NumberField({ required: true, integer: true, initial: 0 }),
-                    stressExtra: new fields.NumberField({ required: true, integer: true, initial: 0 })
-                }),
-                stressDamageReduction: new fields.SchemaField({
-                    severe: stressDamageReductionRule(),
-                    major: stressDamageReductionRule(),
-                    minor: stressDamageReductionRule()
+                damageReduction: new fields.SchemaField({
+                    maxArmorMarked: new fields.SchemaField({
+                        value: new fields.NumberField({ required: true, integer: true, initial: 1 }),
+                        bonus: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+                        stressExtra: new fields.NumberField({ required: true, integer: true, initial: 0 })
+                    }),
+                    stressDamageReduction: new fields.SchemaField({
+                        severe: stressDamageReductionRule(),
+                        major: stressDamageReductionRule(),
+                        minor: stressDamageReductionRule()
+                    }),
+                    increasePerArmorMark: new fields.NumberField({ integer: true, initial: 1 }),
+                    magical: new fields.BooleanField({ initial: false }),
+                    physical: new fields.BooleanField({ initial: false })
                 }),
                 strangePatterns: new fields.NumberField({
                     integer: true,
@@ -134,6 +147,18 @@ export default class DhCharacter extends BaseDataActor {
                     max: 12,
                     nullable: true,
                     initial: null
+                }),
+                weapon: new fields.SchemaField({
+                    /*  Unimplemented 
+                        -> Should remove the lowest damage dice from weapon damage 
+                        -> Reflect this in the chat message somehow so players get feedback that their choice is helping them.
+                    */
+                    dropLowestDamageDice: new fields.BooleanField({ initial: false }),
+                    /*  Unimplemented 
+                        -> Should flip any lowest possible dice rolls for weapon damage to highest
+                        -> Reflect this in the chat message somehow so players get feedback that their choice is helping them.
+                    */
+                    flipMinDiceValue: new fields.BooleanField({ intial: false })
                 }),
                 runeWard: new fields.BooleanField({ initial: false })
             })
@@ -282,6 +307,13 @@ export default class DhCharacter extends BaseDataActor {
         );
     }
 
+    get armorApplicableDamageTypes() {
+        return {
+            physical: !this.rules.damageReduction.magical,
+            magical: !this.rules.damageReduction.physical
+        };
+    }
+
     static async unequipBeforeEquip(itemToEquip) {
         const primary = this.primaryWeapon,
             secondary = this.secondaryWeapon;
@@ -348,6 +380,7 @@ export default class DhCharacter extends BaseDataActor {
         }
 
         const armor = this.armor;
+        this.armorScore = this.armor ? this.armor.system.baseScore + (this.bonuses.armorScore ?? 0) : 0; // Bonuses to armorScore won't have been applied yet. Need to solve in documentPreparation somehow
         this.damageThresholds = {
             major: armor
                 ? armor.system.baseThresholds.major + this.levelData.level.current
@@ -372,9 +405,9 @@ export default class DhCharacter extends BaseDataActor {
             experience.total = experience.value + experience.bonus;
         }
 
-        this.rules.maxArmorMarked.total = this.rules.maxArmorMarked.value + this.rules.maxArmorMarked.bonus;
+        this.rules.damageReduction.maxArmorMarked.total =
+            this.rules.damageReduction.maxArmorMarked.value + this.rules.damageReduction.maxArmorMarked.bonus;
 
-        this.armorScore = this.armor ? this.armor.system.baseScore + (this.bonuses.armorScore ?? 0) : 0;
         this.resources.hitPoints.maxTotal = (this.class.value?.system?.hitPoints ?? 0) + this.resources.hitPoints.bonus;
         this.resources.stress.maxTotal = this.resources.stress.max + this.resources.stress.bonus;
         this.evasion.total = (this.class?.evasion ?? 0) + this.evasion.bonus;

@@ -24,12 +24,18 @@ export default class CharacterSheet extends DHBaseActorSheet {
             levelManagement: CharacterSheet.#levelManagement,
             toggleEquipItem: CharacterSheet.#toggleEquipItem,
             useItem: this.useItem, //TODO Fix this
+            useAction: this.useAction,
             toChat: this.toChat
         },
         window: {
             resizable: true
         },
-        dragDrop: [],
+        dragDrop: [
+            {
+                dragSelector: '[data-item-id][draggable="true"]',
+                dropSelector: null
+            }
+        ],
         contextMenus: [
             {
                 handler: CharacterSheet._getContextMenuOptions,
@@ -621,6 +627,20 @@ export default class CharacterSheet extends DHBaseActorSheet {
     }
 
     /**
+     * Use an action
+     * @type {ApplicationClickAction}
+     */
+    static async useAction(event, button) {
+        const item = this.getItem(button);
+        if (!item) return;
+
+        const action = item.system.actions.find(x => x.id === button.dataset.actionId);
+        if (!action) return;
+
+        action.use(event);
+    }
+
+    /**
      * Send item to Chat
      * @type {ApplicationClickAction}
      */
@@ -650,11 +670,24 @@ export default class CharacterSheet extends DHBaseActorSheet {
         }
     }
 
-    async _onDragStart(_, event) {
+    async _onDragStart(event) {
+        const item = this.getItem(event);
+        
+        const dragData = {
+            type: item.documentName,
+            uuid: item.uuid
+        };
+        
+        event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+        
         super._onDragStart(event);
     }
 
     async _onDrop(event) {
+        // Prevent event bubbling to avoid duplicate handling
+        event.preventDefault();
+        event.stopPropagation();
+        
         super._onDrop(event);
         this._onDropItem(event, TextEditor.getDragEventData(event));
     }

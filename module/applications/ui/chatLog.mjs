@@ -80,8 +80,8 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
                 actor.system.attack?._id === actionId
                     ? actor.system.attack
                     : item.system.attack?._id === actionId
-                        ? item.system.attack
-                        : item?.system?.actions?.find(a => a._id === actionId);
+                      ? item.system.attack
+                      : item?.system?.actions?.find(a => a._id === actionId);
         return action;
     }
 
@@ -215,7 +215,7 @@ export default class DhpChatLog extends foundry.applications.sidebar.tabs.ChatLo
             if (message.system.onSave && message.system.targets.find(t => t.id === target.id)?.saved?.success === true)
                 damage = Math.ceil(damage * (CONFIG.DH.ACTIONS.damageOnSave[message.system.onSave]?.mod ?? 1));
 
-            target.actor.takeDamage(damage, message.system.roll.type);
+            target.actor.takeDamage(damage, message.system.damage.damageType);
         }
     };
 

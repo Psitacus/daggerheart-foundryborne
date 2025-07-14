@@ -56,8 +56,8 @@ export default class DHRoll extends Roll {
 
         // Create Chat Message
         if (config.source?.message) {
+            if(game.modules.get('dice-so-nice')?.active) await game.dice3d.showForRoll(roll, game.user, true);
         } else {
-            const messageData = {};
             config.message = await this.toMessage(roll, config);
         }
     }
@@ -154,7 +154,7 @@ export const registerRollDiceHooks = () => {
 
         if (updates.length) actor.modifyResource(updates);
 
-        if (!config.roll.hasOwnProperty('success') && !config.targets.length) return;
+        if (!config.roll.hasOwnProperty('success') && !config.targets?.length) return;
 
         const rollResult = config.roll.success || config.targets.some(t => t.hit),
             looseSpotlight = !rollResult || config.roll.result.duality === -1;

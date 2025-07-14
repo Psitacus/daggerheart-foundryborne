@@ -161,7 +161,7 @@ export default class DHBaseAction extends foundry.abstract.DataModel {
             updateSource['range'] = parent?.system?.attack?.range;
             updateSource['roll'] = {
                 useDefault: true
-            }
+            };
         } else {
             if (parent?.system?.trait) {
                 updateSource['roll'] = {
@@ -179,16 +179,9 @@ export default class DHBaseAction extends foundry.abstract.DataModel {
     getRollData(data = {}) {
         const actorData = this.actor.getRollData(false);
 
-        // Remove when included directly in Actor getRollData
-        actorData.prof = actorData.proficiency?.value ?? 1;
-        actorData.cast = actorData.spellcast?.value ?? 1;
+        // Add Roll results to RollDatas
         actorData.result = data.roll?.total ?? 1;
-        /* actorData.scale = data.costs?.length
-                ? data.costs.reduce((a, c) => {
-                      a[c.type] = c.value;
-                      return a;
-                  }, {})
-                : 1; */
+        
         actorData.scale = data.costs?.length // Right now only return the first scalable cost.
             ? (data.costs.find(c => c.scalable)?.total ?? 1)
             : 1;
@@ -295,7 +288,7 @@ export default class DHBaseAction extends foundry.abstract.DataModel {
     }
 
     prepareTarget() {
-        if(!this.target?.type) return [];
+        if (!this.target?.type) return [];
         let targets;
         if (this.target?.type === CONFIG.DH.ACTIONS.targetTypes.self.id)
             targets = this.constructor.formatTarget(this.actor.token ?? this.actor.prototypeToken);
@@ -337,7 +330,8 @@ export default class DHBaseAction extends foundry.abstract.DataModel {
         const resources = config.costs
             .filter(c => c.enabled !== false)
             .map(c => {
-                return { type: c.type, value: (c.total ?? c.value) * -1 };
+                const resource = this.actor.system.resources[c.type];
+                return { type: c.type, value: (c.total ?? c.value) * (resource.hasOwnProperty('maxTotal') ? 1 : -1) };
             });
 
         await this.actor.modifyResource(resources);
@@ -382,15 +376,21 @@ export default class DHBaseAction extends foundry.abstract.DataModel {
         const realCosts = this.getRealCosts(costs),
             hasFearCost = realCosts.findIndex(c => c.type === 'fear');
         if (hasFearCost > -1) {
-            const fearCost = realCosts.splice(hasFearCost, 1);
+            const fearCost = realCosts.splice(hasFearCost, 1)[0];
             if (
                 !game.user.isGM ||
-                fearCost[0].total > game.settings.get(CONFIG.DH.id, CONFIG.DH.SETTINGS.gameSettings.Resources.Fear)
+                fearCost.total > game.settings.get(CONFIG.DH.id, CONFIG.DH.SETTINGS.gameSettings.Resources.Fear)
             )
                 return false;
         }
+
+        /* maxTotal is a sign that the resource is inverted, IE it counts upwards instead of down */
+        const resources = this.actor.system.resources;
         return realCosts.reduce(
-            (a, c) => a && this.actor.system.resources[c.type]?.value >= (c.total ?? c.value),
+            (a, c) =>
+                a && resources[c.type].hasOwnProperty('maxTotal')
+                    ? resources[c.type].value + (c.total ?? c.value) <= resources[c.type].maxTotal
+                    : resources[c.type]?.value >= (c.total ?? c.value),
             true
         );
     }
